@@ -13,6 +13,7 @@ export enum PromptType {
   EXTRACTOR = 'extractor',
   PLANNER = 'planner',
   ASKER = 'asker',
+  FORM_VALIDATOR = 'form-validator',
   RISK = 'risk',
   TECH = 'tech',
   MVP = 'mvp',
