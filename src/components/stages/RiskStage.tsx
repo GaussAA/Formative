@@ -5,6 +5,7 @@ import { Risk, RiskApproach, RiskSeverity, Stage } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Badge } from '../shared/Badge';
 import { Button } from '../shared/Button';
+import { SkeletonLoader } from '../shared/SkeletonLoader';
 import { useStage } from '@/contexts/StageContext';
 
 export function RiskStage() {
@@ -84,14 +85,7 @@ export function RiskStage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">正在分析潜在风险...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonLoader stage="risk" />;
   }
 
   // 按严重程度分组风险

@@ -43,12 +43,32 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
 
   const getHighlightClass = (key: string) => {
     return highlights[key]
-      ? 'ring-2 ring-primary ring-offset-2 bg-blue-50 border-primary animate-pulse'
+      ? 'border-primary shadow-lg shadow-primary/20 animate-highlight-glow'
       : '';
   };
 
   return (
     <div className="w-80 bg-slate-100 border-r border-slate-200 flex flex-col shadow-sm">
+      <style jsx>{`
+        @keyframes highlight-glow {
+          0% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4),
+                        0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2),
+                        0 10px 15px -3px rgba(59, 130, 246, 0.2);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0),
+                        0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+        }
+
+        .animate-highlight-glow {
+          animation: highlight-glow 2s ease-out forwards;
+        }
+      `}</style>
       {/* Header */}
       <div className="px-6 py-5 bg-white border-b border-slate-200">
         <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center">

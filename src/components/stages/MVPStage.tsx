@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MVPFeature, DevPlan, Stage } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Button } from '../shared/Button';
+import { SkeletonLoader } from '../shared/SkeletonLoader';
 import { useStage } from '@/contexts/StageContext';
 
 export function MVPStage() {
@@ -73,14 +74,7 @@ export function MVPStage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">正在规划MVP功能边界...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonLoader stage="mvp" />;
   }
 
   const mvpFeatures = features.filter((f) => f.inMVP);

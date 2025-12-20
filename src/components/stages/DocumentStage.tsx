@@ -5,6 +5,7 @@ import { Stage } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Button } from '../shared/Button';
 import { Badge } from '../shared/Badge';
+import { SkeletonLoader } from '../shared/SkeletonLoader';
 import { useStage } from '@/contexts/StageContext';
 
 export function DocumentStage() {
@@ -100,14 +101,7 @@ export function DocumentStage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">正在生成产品需求文档...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonLoader stage="document" />;
   }
 
   return (

@@ -58,7 +58,7 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     },
     {
       id: 5,
-      stage: Stage.SPEC_GENERATION,
+      stage: Stage.DOCUMENT_GENERATION,
       name: '生成文档',
       icon: '📄',
       status: TabStatus.LOCKED,
