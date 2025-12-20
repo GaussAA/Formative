@@ -1,159 +1,208 @@
 # 定型 Formative
 
-> AI 开发前的需求澄清工具
+> **不是 AI 不行，是需求没定型**
+> 在让 AI 写第一行代码之前，先让你的想法变成可执行的开发方案
 
-定型（Formative）是一个位于「AI 写代码之前」的前置工具，通过多 Agent 对话流程，帮助用户将模糊、白话式的想法系统性地转化为 AI 可执行的开发方案。
+![Hero Image](./docs/images/hero.png)
+<!-- 请在 docs/images/ 目录下添加 hero.png 截图 -->
 
-## 特性
+---
 
-- ✅ 基于 LangGraph 的多 Agent 编排
-- ✅ 内存持久化对话状态（MemorySaver）
-- ✅ 智能需求澄清与补全
-- ✅ 风险分析与技术选型建议
-- ✅ 自动生成结构化开发文档
-- 🚧 Redis Checkpointer（生产环境推荐）
+## 📖 项目简介
 
-## 技术栈
+**定型 Formative** 是一个 AI 驱动的产品开发方案生成器，专注于解决 VibeCoding 的"最前一公里"问题。
 
-- **前端**: Next.js 15 + React 19 + TailwindCSS
-- **Agent 编排**: LangGraph (TypeScript)
-- **LLM**: DeepSeek / Qwen / Ollama（可配置）
-- **状态存储**: MemorySaver（MVP），Redis（生产环境）
-- **语言**: TypeScript
+大多数人使用 AI 写代码失败，并不是因为 AI 不会写代码，**而是因为一开始就说不清楚自己想要什么**。
 
-## 快速开始
+定型通过五个结构化阶段，帮助你：
+- 📝 把一句白话需求，拆解成完整的工程问题
+- ⚠️ 暴露潜在风险，并给出可选方案
+- 🔧 确定适合你的技术栈，而不是"看起来最酷的那种"
+- 📋 明确 MVP 边界，知道做什么、不做什么
+- 📄 生成一份 AI 能真正执行的开发方案文档
+
+**你不需要懂架构、不需要会数据库，你只需要回答问题、做选择。剩下的复杂度，由定型替你承担。**
+
+---
+
+## ✨ 核心价值
+
+### 问题：不是 AI 不行，是人没准备好
+用户往往只有一句话的想法：
+- "我想做一个 App"
+- "我想搞个 AI 工具"
+- "能不能帮我写个网站"
+
+于是 AI 开始猜，用户开始改；AI 不断生成，用户不断推倒。最后的结果通常只有三种：
+- 项目越写越乱
+- 出了错也看不懂
+- 只能不停地说一句话："不对，改一下"
+
+**问题不在代码，而在"需求没有定型"。**
+
+### 转折：定型，发生在写代码之前
+定型不是一个写代码的工具，它存在于 VibeCoding 的**最前一公里**。
+
+在你让 AI 开始写第一行代码之前，定型会做三件关键的事：
+1. 把一句白话需求，拆解成完整的工程问题
+2. 暴露潜在风险，并给出可选方案
+3. 帮你做出适合你的技术决策
+
+### 结果：你第一次拥有"AI 能真正执行的方案"
+当你完成定型流程，你最终拿到的不是聊天记录，而是：
+- 📋 明确边界的 MVP 定义
+- 🔧 已确定技术栈的开发方案
+- 📊 必要的技术说明（数据库/API/部署配置）
+- 📄 完整的开发文档（可以直接交给 AI 执行）
+
+这意味着：
+- ✓ AI 不再自由发挥
+- ✓ 你不再反复推倒重来
+- ✓ VibeCoding 变成一个可控、可推进的过程
+
+---
+
+## 🚀 快速开始
 
 ### 1. 环境要求
-
-- Node.js >= 18
-- DeepSeek/Qwen API Key 或本地 Ollama
-
-**注意**: MVP阶段使用内存存储（MemorySaver），暂不需要Redis。生产环境建议使用Redis Checkpointer。
+- **Node.js**: >= 18.0
+- **LLM API**: DeepSeek / Qwen / Ollama
 
 ### 2. 安装依赖
 
 ```bash
+# 克隆项目
+git clone https://github.com/jaguarliuu/Formative.git
+cd Formative
+
+# 安装依赖
 npm install
 ```
 
 ### 3. 配置环境变量
 
-复制 `.env.example` 为 `.env` 并填写配置：
+创建 `.env.local` 文件：
 
 ```bash
-cp .env.example .env
+# LLM 配置
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+
+# 或使用其他提供商
+# QWEN_API_KEY=your_qwen_api_key
+# OLLAMA_BASE_URL=http://localhost:11434
 ```
 
-必填配置：
-- `LLM_PROVIDER`: LLM 提供商（deepseek/qwen/ollama）
-- `LLM_API_KEY`: API 密钥（ollama 不需要）
-
-可选配置：
-- `REDIS_URL`: Redis 连接地址（暂不使用，预留）
-
-### 4. 运行开发服务器
+### 4. 启动应用
 
 ```bash
 npm run dev
 ```
 
-访问 [http://localhost:3000](http://localhost:3000)
+访问 [http://localhost:3000](http://localhost:3000) 即可开始使用。
 
-## 项目结构
+---
 
-```
-formative/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── api/chat/          # Chat API 端点
-│   │   ├── layout.tsx
-│   │   └── page.tsx           # 主页面
-│   ├── components/            # React 组件（未来扩展）
-│   ├── lib/                   # 核心业务逻辑
-│   │   ├── agents/           # Agent 节点实现
-│   │   │   ├── extractor.ts
-│   │   │   ├── planner.ts
-│   │   │   ├── asker.ts
-│   │   │   ├── risk-analyst.ts
-│   │   │   ├── tech-advisor.ts
-│   │   │   └── spec-generator.ts
-│   │   ├── graph/            # LangGraph 编排
-│   │   │   ├── state.ts
-│   │   │   └── index.ts
-│   │   ├── llm/              # LLM 调用层
-│   │   │   └── helper.ts
-│   │   ├── logger/           # 日志模块
-│   │   │   └── index.ts
-│   │   ├── memory/           # 记忆层
-│   │   │   ├── interface.ts
-│   │   │   ├── local-storage.ts
-│   │   │   └── redis-checkpointer.ts
-│   │   └── prompts/          # 提示词管理
-│   │       └── index.ts
-│   └── types/                # TypeScript 类型定义
-│       └── index.ts
-├── prompts/                  # 提示词模板
-│   ├── extractor.system.md
-│   ├── planner.system.md
-│   ├── asker.system.md
-│   ├── risk.system.md
-│   ├── tech.system.md
-│   └── spec.system.md
-├── docs/                     # 文档
-│   └── FormativePrd.md      # 产品需求文档
-└── data/                     # 本地数据（可选）
-```
+## 📱 使用指南
 
-## Agent 工作流程
+### 第一步：开始定型
+1. 访问首页，点击"立即开始"按钮
+2. 进入主应用界面
 
-```mermaid
-graph LR
-    A[用户输入] --> B[Extractor<br/>信息提取]
-    B --> C[Planner<br/>完备度评估]
-    C --> D{是否完整?}
-    D -->|否| E[Asker<br/>生成问题]
-    E --> A
-    D -->|是| F[Risk Analyst<br/>风险分析]
-    F --> G[Tech Advisor<br/>技术选型]
-    G --> H[Spec Generator<br/>文档生成]
-    H --> I[完成]
-```
+### 第二步：需求采集（阶段 1/5）
+- AI 会通过对话方式收集你的需求
+- 你可以选择 AI 提供的选项卡片，或自由输入文本
+- 左侧面板会实时显示已收集的信息
+- 完成度达到 100% 后自动进入下一阶段
 
-## 阶段说明
+### 第三步：风险评估（阶段 2/5）
+- AI 分析你的需求，识别潜在风险点
+- 展示高/中/低风险分类
+- 提供 3 种实施方案对比表
+- 你需要选择一个最适合的方案
 
-1. **需求采集** (Stage 1): 提取产品目标、用户、场景、功能
-2. **风险分析** (Stage 2): 识别技术风险，提供方案选项
-3. **技术选型** (Stage 3): 推荐合适的技术栈
-4. **MVP 边界** (Stage 4): 明确做什么、不做什么
-5. **文档生成** (Stage 5): 输出完整的开发方案文档
+### 第四步：技术选型（阶段 3/5）
+- 基于你的需求和风险方案，推荐技术栈
+- 通常提供 3 种选项：
+  - 前端纯静态（最简单）
+  - 全栈方案（功能完整）
+  - BaaS 方案（快速上线）
+- 每个方案展示优缺点、演进成本、适用场景
 
-## 开发指南
+### 第五步：MVP 规划（阶段 4/5）
+- AI 提出功能清单，标注哪些应在 MVP 中实现
+- 你可以调整功能的优先级
+- 确认 MVP 边界和非目标（不做什么）
 
-### 添加新的 Agent 节点
+### 第六步：生成文档（阶段 5/5）
+- AI 自动生成完整的开发方案文档
+- 包含：项目概述、技术栈、数据模型、API 设计、开发步骤
+- 文档格式为 Markdown，可直接复制或导出
 
-1. 在 `src/lib/agents/` 创建新节点文件
-2. 实现节点函数，接收 `GraphStateType`，返回 `Partial<GraphStateType>`
-3. 在 `src/lib/graph/index.ts` 中注册节点和边
+### 放弃任务
+- 如果需要重新开始，点击右上角"放弃任务"按钮
+- 系统会清空所有数据，返回需求采集阶段
 
-### 自定义提示词
+---
 
-编辑 `prompts/` 目录下的 Markdown 文件，系统会自动加载。
+## 🎯 适用场景
 
-### 切换 LLM 提供商
+定型适合以下人群和场景：
 
-修改 `.env` 中的 `LLM_PROVIDER` 和相关配置即可。
+✅ **非技术创业者**
+有想法但不懂技术，需要把想法转化成技术方案
 
-## 常见问题
+✅ **产品经理**
+需要快速输出 PRD 和技术选型建议
 
-**Q: Redis 连接失败怎么办？**
-A: MVP阶段使用内存存储，不需要Redis。如需使用Redis，请实现完整的RedisCheckpointer。
+✅ **独立开发者**
+想在开发前理清思路，避免中途推倒重来
 
-**Q: 支持哪些 LLM？**
-A: 目前支持 DeepSeek、Qwen（阿里云）和本地 Ollama。所有兼容 OpenAI API 的提供商理论上都可以使用。
+✅ **AI 编程爱好者**
+使用 Cursor、Claude Code 等工具前，先生成清晰的方案文档
 
-**Q: 会话数据会丢失吗？**
-A: MVP阶段使用MemorySaver，服务重启会丢失数据。生产环境建议实现Redis Checkpointer实现持久化。
+---
 
-## 许可证
+## 🔧 技术栈
 
-MIT
+- **前端框架**: Next.js 14 (App Router)
+- **UI 库**: React 19 + Tailwind CSS
+- **状态管理**: React Context API
+- **语言**: TypeScript
+- **LLM**: DeepSeek / Qwen / Ollama (可配置)
+
+---
+
+## 📚 文档
+
+- [产品需求文档 (PRD)](./docs/FormativePrd.md)
+- [多标签设计文档](./docs/MultiTabDesign.md)
+- [项目进度文档](./docs/PROGRESS.md)
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+如果你有任何建议或发现 Bug，请在 [GitHub Issues](https://github.com/jaguarliuu/formative/issues) 中反馈。
+
+---
+
+## 📄 许可证
+
+MIT License
+
+---
+
+## 💬 联系方式
+
+- **项目地址**: [GitHub](https://github.com/jaguarliuu/formative)
+- **反馈建议**: 通过 GitHub Issues 提交
+
+---
+
+**准备好让你的想法定型了吗？**
+5 分钟，从一句话到完整方案。
+
+[开始使用 →](http://localhost:3000)

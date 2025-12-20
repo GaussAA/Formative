@@ -19,6 +19,9 @@ interface StageContextValue {
   // 会话信息
   sessionId: string | null;
   setSessionId: (id: string) => void;
+
+  // 重置功能
+  resetAll: () => void;
 }
 
 const StageContext = createContext<StageContextValue | undefined>(undefined);
@@ -128,6 +131,50 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     [tabs, setCurrentStage]
   );
 
+  const resetAll = useCallback(() => {
+    // 重置到初始状态
+    setCurrentStageState(Stage.REQUIREMENT_COLLECTION);
+    setSessionId(null);
+    setStageData({ requirement: {} });
+    setTabs([
+      {
+        id: 1,
+        stage: Stage.REQUIREMENT_COLLECTION,
+        name: '需求采集',
+        icon: '📝',
+        status: TabStatus.ACTIVE,
+      },
+      {
+        id: 2,
+        stage: Stage.RISK_ANALYSIS,
+        name: '风险评估',
+        icon: '⚠️',
+        status: TabStatus.LOCKED,
+      },
+      {
+        id: 3,
+        stage: Stage.TECH_STACK,
+        name: '技术选型',
+        icon: '🔧',
+        status: TabStatus.LOCKED,
+      },
+      {
+        id: 4,
+        stage: Stage.MVP_BOUNDARY,
+        name: 'MVP规划',
+        icon: '📋',
+        status: TabStatus.LOCKED,
+      },
+      {
+        id: 5,
+        stage: Stage.DOCUMENT_GENERATION,
+        name: '生成文档',
+        icon: '📄',
+        status: TabStatus.LOCKED,
+      },
+    ]);
+  }, []);
+
   const value: StageContextValue = {
     currentStage,
     tabs,
@@ -139,6 +186,7 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     goToStage,
     sessionId,
     setSessionId,
+    resetAll,
   };
 
   return <StageContext.Provider value={value}>{children}</StageContext.Provider>;
