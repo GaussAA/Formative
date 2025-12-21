@@ -17,6 +17,8 @@ export enum PromptType {
   RISK = 'risk',
   TECH = 'tech',
   MVP = 'mvp',
+  DIAGRAM = 'diagram',
+  DIAGRAM_UPDATE = 'diagram-update',
   SPEC = 'spec',
 }
 

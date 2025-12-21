@@ -69,8 +69,9 @@ export enum Stage {
   RISK_ANALYSIS = 2,
   TECH_STACK = 3,
   MVP_BOUNDARY = 4,
-  DOCUMENT_GENERATION = 5,
-  COMPLETED = 6,
+  DIAGRAM_DESIGN = 5,
+  DOCUMENT_GENERATION = 6,
+  COMPLETED = 7,
 }
 
 export const StageNames: Record<Stage, string> = {
@@ -79,6 +80,7 @@ export const StageNames: Record<Stage, string> = {
   [Stage.RISK_ANALYSIS]: '风险分析',
   [Stage.TECH_STACK]: '技术选型',
   [Stage.MVP_BOUNDARY]: 'MVP边界确认',
+  [Stage.DIAGRAM_DESIGN]: '架构设计',
   [Stage.DOCUMENT_GENERATION]: '文档生成',
   [Stage.COMPLETED]: '已完成',
 };
@@ -100,6 +102,10 @@ export interface StagesSummary {
   [Stage.MVP_BOUNDARY]?: {
     mvpFeatures: string[];
     nonGoals: string[];
+  };
+  [Stage.DIAGRAM_DESIGN]?: {
+    architectureDiagram: string;
+    sequenceDiagram: string;
   };
   [Stage.DOCUMENT_GENERATION]?: {
     finalSpec: string; // Markdown content
@@ -231,6 +237,18 @@ export interface TechStackOption {
   recommended?: boolean;
 }
 
+// ============= Diagram Types =============
+export interface Diagram {
+  type: 'architecture' | 'sequence';
+  mermaidCode: string;
+  description?: string;
+}
+
+export interface DiagramsData {
+  architectureDiagram: Diagram;
+  sequenceDiagram: Diagram;
+}
+
 // ============= MVP Planning Types =============
 export interface MVPFeature {
   id: string;
@@ -263,5 +281,6 @@ export interface StageData {
     features: MVPFeature[];
     devPlan: DevPlan;
   };
+  diagrams?: DiagramsData; // 图表数据，不参与文档生成的上下文
   finalSpec?: string;
 }

@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Button } from '../shared/Button';
 import { Badge } from '../shared/Badge';
 import { SkeletonLoader } from '../shared/SkeletonLoader';
+import { Modal } from '../shared/Modal';
 import { useStage } from '@/contexts/StageContext';
 
 export function DocumentStage() {
@@ -13,6 +14,8 @@ export function DocumentStage() {
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<string>('');
   const [downloading, setDownloading] = useState(false);
+  const [showCopiedModal, setShowCopiedModal] = useState(false);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
 
   useEffect(() => {
     if (stageData.finalSpec) {
@@ -35,6 +38,7 @@ export function DocumentStage() {
           riskApproach: stageData.riskAnalysis?.selectedApproach,
           techStack: stageData.techStack?.selected,
           mvpBoundary: stageData.mvpBoundary,
+          diagrams: stageData.diagrams, // 传递图表数据，但不会进入LLM上下文
         }),
       });
 
@@ -63,41 +67,18 @@ export function DocumentStage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadPDF = async () => {
-    setDownloading(true);
-    try {
-      const response = await fetch('/api/export-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document }),
-      });
-
-      if (!response.ok) throw new Error('Failed to generate PDF');
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = window.document.createElement('a');
-      a.href = url;
-      a.download = `${stageData.requirement.projectName || 'project'}-spec.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error:', error);
-      alert('PDF导出失败，请稍后重试');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(document);
-    alert('已复制到剪贴板');
+    setShowCopiedModal(true);
   };
 
   const handleRegenerate = () => {
-    if (confirm('确定要重新生成文档吗？这将覆盖当前内容。')) {
-      generateDocument();
-    }
+    setShowRegenerateModal(true);
+  };
+
+  const confirmRegenerate = () => {
+    setShowRegenerateModal(false);
+    generateDocument();
   };
 
   if (loading) {
@@ -155,9 +136,6 @@ export function DocumentStage() {
               <Button onClick={handleDownloadMarkdown} variant="primary">
                 下载 Markdown
               </Button>
-              <Button onClick={handleDownloadPDF} variant="secondary" loading={downloading}>
-                下载 PDF
-              </Button>
               <Button onClick={handleCopyToClipboard} variant="outline">
                 复制到剪贴板
               </Button>
@@ -165,6 +143,9 @@ export function DocumentStage() {
                 🔄 重新生成
               </Button>
             </div>
+            <p className="text-xs text-gray-500 mt-3">
+              提示：Markdown 文件可以使用 Typora、Obsidian、VS Code 等工具打开，这些工具都支持 Mermaid 图表渲染。
+            </p>
           </CardContent>
         </Card>
 
@@ -205,6 +186,29 @@ export function DocumentStage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 复制成功提示弹窗 */}
+      <Modal
+        isOpen={showCopiedModal}
+        onClose={() => setShowCopiedModal(false)}
+        title="复制成功"
+        content="文档已成功复制到剪贴板！"
+        confirmText="好的"
+        showCancel={false}
+        confirmVariant="success"
+      />
+
+      {/* 重新生成确认弹窗 */}
+      <Modal
+        isOpen={showRegenerateModal}
+        onClose={() => setShowRegenerateModal(false)}
+        onConfirm={confirmRegenerate}
+        title="确认重新生成"
+        content="确定要重新生成文档吗？这将覆盖当前内容，此操作无法撤销。"
+        confirmText="确认重新生成"
+        cancelText="取消"
+        confirmVariant="danger"
+      />
     </div>
   );
 }

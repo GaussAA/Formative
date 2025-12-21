@@ -6,25 +6,81 @@ import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Badge } from '../shared/Badge';
 import { Button } from '../shared/Button';
 import { SkeletonLoader } from '../shared/SkeletonLoader';
+import { Modal } from '../shared/Modal';
 import { useStage } from '@/contexts/StageContext';
+
+// 常见技术栈选项
+const TECH_OPTIONS = {
+  frontend: ['React', 'Vue', 'Angular', 'Svelte', 'Solid'],
+  backend: ['Node.js', 'Python', 'Java', 'PHP', 'Go', 'Ruby', '.NET'],
+  database: ['MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'SQLite'],
+};
 
 export function TechStackStage() {
   const { stageData, updateStageData, completeStage, sessionId } = useStage();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<TechStackOption[]>([]);
   const [selected, setSelected] = useState<TechStackOption | null>(null);
+
+  // 技术偏好选择
+  const [showPreferenceModal, setShowPreferenceModal] = useState(true);
+  const [showTechSelectionModal, setShowTechSelectionModal] = useState(false);
+  const [selectedFrontend, setSelectedFrontend] = useState<string[]>([]);
+  const [selectedBackend, setSelectedBackend] = useState<string[]>([]);
+  const [selectedDatabase, setSelectedDatabase] = useState<string[]>([]);
 
   useEffect(() => {
     if (stageData.techStack) {
       setOptions(stageData.techStack.options);
       setSelected(stageData.techStack.selected || null);
       setLoading(false);
-    } else {
-      fetchTechStackOptions();
+      setShowPreferenceModal(false); // 已有数据，不显示偏好选择
     }
   }, []);
 
-  const fetchTechStackOptions = async () => {
+  const handleUseAI = () => {
+    setShowPreferenceModal(false);
+    fetchTechStackOptions();
+  };
+
+  const handleUseTechPreference = () => {
+    setShowPreferenceModal(false);
+    setShowTechSelectionModal(true);
+  };
+
+  const toggleTechSelection = (category: 'frontend' | 'backend' | 'database', tech: string) => {
+    const setters = {
+      frontend: setSelectedFrontend,
+      backend: setSelectedBackend,
+      database: setSelectedDatabase,
+    };
+    const getters = {
+      frontend: selectedFrontend,
+      backend: selectedBackend,
+      database: selectedDatabase,
+    };
+
+    const setter = setters[category];
+    const selected = getters[category];
+
+    if (selected.includes(tech)) {
+      setter(selected.filter(t => t !== tech));
+    } else {
+      setter([...selected, tech]);
+    }
+  };
+
+  const handleConfirmTechSelection = () => {
+    setShowTechSelectionModal(false);
+    const userPreferences = {
+      frontend: selectedFrontend,
+      backend: selectedBackend,
+      database: selectedDatabase,
+    };
+    fetchTechStackOptions(userPreferences);
+  };
+
+  const fetchTechStackOptions = async (userPreferences?: any) => {
     setLoading(true);
     try {
       const response = await fetch('/api/tech-stack', {
@@ -34,6 +90,7 @@ export function TechStackStage() {
           sessionId,
           profile: stageData.requirement,
           riskApproach: stageData.riskAnalysis?.selectedApproach,
+          userPreferences, // 传递用户的技术偏好
         }),
       });
 
@@ -161,6 +218,134 @@ export function TechStackStage() {
           </Button>
         </div>
       </div>
+
+      {/* 技术偏好选择模态框 */}
+      <Modal
+        isOpen={showPreferenceModal}
+        onClose={() => {}} // 不允许直接关闭，必须选择一个选项
+        title="技术栈生成方式"
+        content={
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              请选择您希望如何生成技术栈建议：
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={handleUseAI}
+                className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-all text-left"
+              >
+                <h3 className="font-semibold text-gray-900 mb-1">🤖 AI 智能推荐</h3>
+                <p className="text-sm text-gray-600">
+                  完全由 AI 根据您的需求和风险评估智能推荐最合适的技术栈
+                </p>
+              </button>
+              <button
+                onClick={handleUseTechPreference}
+                className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-all text-left"
+              >
+                <h3 className="font-semibold text-gray-900 mb-1">👤 基于我的技术背景</h3>
+                <p className="text-sm text-gray-600">
+                  根据您熟悉的技术栈（如 Vue、Java、PHP 等）来生成更适合的方案
+                </p>
+              </button>
+            </div>
+          </div>
+        }
+        showCancel={false}
+        confirmText=""
+      />
+
+      {/* 技术栈选择模态框 */}
+      {showTechSelectionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">选择您熟悉的技术栈</h2>
+              <p className="text-sm text-gray-600 mt-1">可以多选，AI 会优先考虑您选择的技术</p>
+            </div>
+
+            <div className="px-6 py-5 space-y-6">
+              {/* 前端技术 */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">前端框架</h3>
+                <div className="flex flex-wrap gap-2">
+                  {TECH_OPTIONS.frontend.map((tech) => (
+                    <button
+                      key={tech}
+                      onClick={() => toggleTechSelection('frontend', tech)}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        selectedFrontend.includes(tech)
+                          ? 'border-primary bg-blue-50 text-primary font-medium'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                      }`}
+                    >
+                      {tech}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 后端技术 */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">后端语言/框架</h3>
+                <div className="flex flex-wrap gap-2">
+                  {TECH_OPTIONS.backend.map((tech) => (
+                    <button
+                      key={tech}
+                      onClick={() => toggleTechSelection('backend', tech)}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        selectedBackend.includes(tech)
+                          ? 'border-primary bg-blue-50 text-primary font-medium'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                      }`}
+                    >
+                      {tech}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 数据库技术 */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">数据库</h3>
+                <div className="flex flex-wrap gap-2">
+                  {TECH_OPTIONS.database.map((tech) => (
+                    <button
+                      key={tech}
+                      onClick={() => toggleTechSelection('database', tech)}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        selectedDatabase.includes(tech)
+                          ? 'border-primary bg-blue-50 text-primary font-medium'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                      }`}
+                    >
+                      {tech}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end gap-3">
+              <Button
+                onClick={() => {
+                  setShowTechSelectionModal(false);
+                  setShowPreferenceModal(true);
+                }}
+                variant="outline"
+              >
+                返回
+              </Button>
+              <Button
+                onClick={handleConfirmTechSelection}
+                disabled={selectedFrontend.length === 0 && selectedBackend.length === 0 && selectedDatabase.length === 0}
+              >
+                确认并生成建议
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
