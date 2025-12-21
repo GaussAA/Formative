@@ -1,7 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Stage, TabStatus, TabConfig, StageData, RequirementProfile } from '@/types';
+import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
+import { generateProjectName } from '@/lib/projectNameGenerator';
 
 interface StageContextValue {
   // 当前状态
@@ -78,6 +80,45 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
   const [stageData, setStageData] = useState<StageData>({
     requirement: {},
   });
+
+  // 保存会话到 IndexedDB
+  const saveSessionToStorage = useCallback(async () => {
+    if (!sessionId) return;
+
+    try {
+      const session: SessionRecord = {
+        sessionId,
+        projectName: generateProjectName(stageData), // 使用智能生成的项目名称
+        createdAt: Date.now(), // 首次创建时会被保留
+        updatedAt: Date.now(),
+        completed: currentStage === Stage.DOCUMENT_GENERATION && !!stageData.finalSpec,
+        currentStage,
+        stageData,
+      };
+
+      // 检查是否已存在，如果存在则保留原创建时间
+      const existing = await sessionStorage.getSession(sessionId);
+      if (existing) {
+        session.createdAt = existing.createdAt;
+      }
+
+      await sessionStorage.saveSession(session);
+    } catch (error) {
+      console.error('Failed to save session to storage:', error);
+    }
+  }, [sessionId, currentStage, stageData]);
+
+  // 当会话数据变化时，自动保存
+  useEffect(() => {
+    if (sessionId && stageData.requirement.productGoal) {
+      // 延迟保存，避免频繁写入
+      const timer = setTimeout(() => {
+        saveSessionToStorage();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [sessionId, stageData, saveSessionToStorage]);
 
   const setCurrentStage = useCallback((stage: Stage) => {
     setCurrentStageState(stage);

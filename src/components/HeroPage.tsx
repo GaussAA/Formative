@@ -25,12 +25,20 @@ export function HeroPage() {
                 <p className="text-xs text-gray-500">让想法有形，让 AI 可执行</p>
               </div>
             </div>
-            <button
-              onClick={handleStart}
-              className="px-6 py-2 bg-primary text-white rounded-xl font-medium hover:bg-blue-600 transition-all shadow-sm hover:shadow-md"
-            >
-              立即开始
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/history')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-xl font-medium hover:bg-gray-100 transition-all"
+              >
+                📋 历史记录
+              </button>
+              <button
+                onClick={handleStart}
+                className="px-6 py-2 bg-primary text-white rounded-xl font-medium hover:bg-blue-600 transition-all shadow-sm hover:shadow-md"
+              >
+                立即开始
+              </button>
+            </div>
           </div>
         </div>
       </nav>
