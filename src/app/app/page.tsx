@@ -8,6 +8,7 @@ import { RequirementStage } from '@/components/stages/RequirementStage';
 import { RiskStage } from '@/components/stages/RiskStage';
 import { TechStackStage } from '@/components/stages/TechStackStage';
 import { MVPStage } from '@/components/stages/MVPStage';
+import { DiagramStage } from '@/components/stages/DiagramStage';
 import { DocumentStage } from '@/components/stages/DocumentStage';
 import { Modal } from '@/components/shared/Modal';
 import { Stage } from '@/types';
@@ -39,6 +40,8 @@ function MainContent() {
         return <TechStackStage />;
       case Stage.MVP_BOUNDARY:
         return <MVPStage />;
+      case Stage.DIAGRAM_DESIGN:
+        return <DiagramStage />;
       case Stage.DOCUMENT_GENERATION:
         return <DocumentStage />;
       default:

@@ -29,7 +29,7 @@ interface TechStackResult {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, profile, riskApproach } = body;
+    const { sessionId, profile, riskApproach, userPreferences } = body;
 
     if (!profile) {
       return NextResponse.json(
@@ -38,18 +38,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.info('Tech stack API called', { sessionId });
+    logger.info('Tech stack API called', { sessionId, hasUserPreferences: !!userPreferences });
 
     // 获取技术选型提示词
     const systemPrompt = await promptManager.getPrompt(PromptType.TECH);
 
-    const contextMessage = `
+    let contextMessage = `
 需求画像：
 ${JSON.stringify(profile, null, 2)}
 
 ${riskApproach ? `选择的风险方案：${riskApproach}` : ''}
+`;
 
+    // 如果用户提供了技术偏好，添加到上下文中
+    if (userPreferences && (userPreferences.frontend?.length > 0 || userPreferences.backend?.length > 0 || userPreferences.database?.length > 0)) {
+      contextMessage += `
+用户熟悉的技术栈（请优先考虑这些技术）：
+${userPreferences.frontend?.length > 0 ? `- 前端：${userPreferences.frontend.join('、')}` : ''}
+${userPreferences.backend?.length > 0 ? `- 后端：${userPreferences.backend.join('、')}` : ''}
+${userPreferences.database?.length > 0 ? `- 数据库：${userPreferences.database.join('、')}` : ''}
+`;
+    }
+
+    contextMessage += `
 请根据需求推荐合适的技术栈方案（2-3个选项）。
+${userPreferences ? '请优先使用用户熟悉的技术栈，但也要确保技术选型合理适配需求。' : ''}
 返回JSON格式，包含以下字段：
 {
   "category": "frontend-only/fullstack/baas",

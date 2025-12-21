@@ -61,6 +61,13 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     },
     {
       id: 5,
+      stage: Stage.DIAGRAM_DESIGN,
+      name: '架构设计',
+      icon: '🏗️',
+      status: TabStatus.LOCKED,
+    },
+    {
+      id: 6,
       stage: Stage.DOCUMENT_GENERATION,
       name: '生成文档',
       icon: '📄',
@@ -167,6 +174,13 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
       },
       {
         id: 5,
+        stage: Stage.DIAGRAM_DESIGN,
+        name: '架构设计',
+        icon: '🏗️',
+        status: TabStatus.LOCKED,
+      },
+      {
+        id: 6,
         stage: Stage.DOCUMENT_GENERATION,
         name: '生成文档',
         icon: '📄',

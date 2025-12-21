@@ -7,7 +7,7 @@ import { RequirementProfile, TechStackOption, MVPFeature, DevPlan } from '@/type
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, requirement, riskApproach, techStack, mvpBoundary } = body;
+    const { sessionId, requirement, riskApproach, techStack, mvpBoundary, diagrams } = body;
 
     if (!requirement) {
       return NextResponse.json(
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     // 获取文档生成提示词
     const systemPrompt = await promptManager.getPrompt(PromptType.SPEC);
 
+    // 注意：diagrams 数据不参与上下文，避免上下文爆炸
     const contextMessage = `
 请根据以下信息生成完整的开发方案文档：
 
@@ -47,7 +48,21 @@ ${mvpBoundary ? `MVP边界：\n${JSON.stringify(mvpBoundary, null, 2)}` : ''}
 文档应该清晰、详细、可执行，适合直接交给开发团队使用。
 `;
 
-    const document = await callLLM(systemPrompt, contextMessage);
+    let document = await callLLM(systemPrompt, contextMessage);
+
+    // 在文档中插入图表（在技术方案章节之后）
+    if (diagrams && (diagrams.architectureDiagram || diagrams.sequenceDiagram)) {
+      const diagramsSection = generateDiagramsSection(diagrams);
+
+      // 尝试在 "数据与API设计" 之前插入图表章节
+      const apiDesignHeader = /##?\s*数据与API设计/;
+      if (apiDesignHeader.test(document)) {
+        document = document.replace(apiDesignHeader, `${diagramsSection}\n\n$&`);
+      } else {
+        // 如果找不到特定章节，直接添加到文档末尾
+        document = `${document}\n\n${diagramsSection}`;
+      }
+    }
 
     logger.info('Specification document generated', {
       sessionId,
@@ -69,4 +84,31 @@ ${mvpBoundary ? `MVP边界：\n${JSON.stringify(mvpBoundary, null, 2)}` : ''}
       { status: 500 }
     );
   }
+}
+
+// 生成图表章节的 Markdown 内容
+function generateDiagramsSection(diagrams: any): string {
+  let section = '## 系统设计图\n\n';
+
+  if (diagrams.architectureDiagram) {
+    section += '### 系统架构图\n\n';
+    if (diagrams.architectureDiagram.description) {
+      section += `${diagrams.architectureDiagram.description}\n\n`;
+    }
+    section += '```mermaid\n';
+    section += diagrams.architectureDiagram.mermaidCode;
+    section += '\n```\n\n';
+  }
+
+  if (diagrams.sequenceDiagram) {
+    section += '### 核心流程时序图\n\n';
+    if (diagrams.sequenceDiagram.description) {
+      section += `${diagrams.sequenceDiagram.description}\n\n`;
+    }
+    section += '```mermaid\n';
+    section += diagrams.sequenceDiagram.mermaidCode;
+    section += '\n```\n\n';
+  }
+
+  return section;
 }

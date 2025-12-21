@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 interface SkeletonLoaderProps {
-  stage: 'risk' | 'tech' | 'mvp' | 'document';
+  stage: 'risk' | 'tech' | 'mvp' | 'diagram' | 'document';
 }
 
 const stageMessages = {
@@ -21,6 +21,11 @@ const stageMessages = {
     '正在规划MVP功能...',
     '划分开发阶段...',
     '评估开发复杂度...',
+  ],
+  diagram: [
+    '正在生成系统架构图...',
+    '正在设计流程时序图...',
+    '正在优化图表布局...',
   ],
   document: [
     '正在生成文档...',
