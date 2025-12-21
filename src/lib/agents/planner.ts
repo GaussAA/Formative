@@ -180,8 +180,8 @@ ${JSON.stringify(state.profile, null, 2)}
       case Stage.MVP_BOUNDARY:
         // MVP边界定义阶段：评估是否可以生成最终文档
         needMoreInfo = false;
-        nextStage = Stage.SPEC_GENERATION;
-        logger.info('✅ PLANNER: MVP boundaries defined, transitioning to SPEC_GENERATION');
+        nextStage = Stage.DIAGRAM_DESIGN;
+        logger.info('✅ PLANNER: MVP boundaries defined, transitioning to DIAGRAM_DESIGN');
         break;
 
       default:

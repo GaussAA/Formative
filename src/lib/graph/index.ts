@@ -107,7 +107,8 @@ function routeNext(state: GraphStateType): string {
         return 'spec_generator'; // 进入最终文档生成
       }
 
-    case Stage.SPEC_GENERATION:
+    case Stage.DIAGRAM_DESIGN:
+    case Stage.DOCUMENT_GENERATION:
     case Stage.COMPLETED:
       logger.info('⛔ ROUTING: Ending workflow (stage complete)');
       return END;

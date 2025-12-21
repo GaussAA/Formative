@@ -93,7 +93,7 @@ function MainContent() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-3">
         <div className="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500">
-          Powered by Claude AI • 定型 v1.0
+          Powered by Trae&Jaguarliu • 定型 v1.0
         </div>
       </footer>
 
