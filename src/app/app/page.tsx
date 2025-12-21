@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StageProvider, useStage } from '@/contexts/StageContext';
 import { TabNavigation } from '@/components/TabNavigation';
@@ -9,21 +9,24 @@ import { RiskStage } from '@/components/stages/RiskStage';
 import { TechStackStage } from '@/components/stages/TechStackStage';
 import { MVPStage } from '@/components/stages/MVPStage';
 import { DocumentStage } from '@/components/stages/DocumentStage';
+import { Modal } from '@/components/shared/Modal';
 import { Stage } from '@/types';
 
 function MainContent() {
   const { currentStage, resetAll } = useStage();
   const router = useRouter();
+  const [isAbandonModalOpen, setIsAbandonModalOpen] = useState(false);
 
   const handleAbandonTask = () => {
-    const confirmed = window.confirm(
-      '确定要放弃当前任务吗？所有进度将会丢失，此操作无法撤销。'
-    );
-    if (confirmed) {
-      resetAll();
-      // 可选：跳转回首页
-      // router.push('/');
-    }
+    setIsAbandonModalOpen(true);
+  };
+
+  const handleConfirmAbandon = () => {
+    resetAll();
+    // 自动刷新页面以重新开始
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   };
 
   const renderStage = () => {
@@ -82,6 +85,18 @@ function MainContent() {
           Powered by Claude AI • 定型 v1.0
         </div>
       </footer>
+
+      {/* 放弃任务确认弹窗 */}
+      <Modal
+        isOpen={isAbandonModalOpen}
+        onClose={() => setIsAbandonModalOpen(false)}
+        onConfirm={handleConfirmAbandon}
+        title="放弃当前任务"
+        content="确定要放弃当前任务吗？所有进度将会丢失，此操作无法撤销。"
+        confirmText="确认放弃"
+        cancelText="取消"
+        confirmVariant="danger"
+      />
     </div>
   );
 }

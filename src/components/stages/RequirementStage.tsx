@@ -127,8 +127,15 @@ export function RequirementStage() {
     sendMessage(input);
   };
 
-  const handleOptionClick = (value: string) => {
-    sendMessage(value);
+  const handleOptionClick = (label: string) => {
+    // 将选项的友好文本添加到输入框，而不是直接提交
+    setInput((prevInput) => {
+      // 如果输入框已有内容，用逗号+空格分隔
+      if (prevInput.trim()) {
+        return prevInput + ', ' + label;
+      }
+      return label;
+    });
   };
 
   // 表单相关函数
@@ -279,7 +286,7 @@ export function RequirementStage() {
                         {msg.options.map((option) => (
                           <Button
                             key={option.id}
-                            onClick={() => handleOptionClick(option.value)}
+                            onClick={() => handleOptionClick(option.label)}
                             disabled={loading}
                             variant="outline"
                             size="sm"
