@@ -193,22 +193,14 @@ export function RequirementStage() {
       // 更新全局状态
       updateStageData({ requirement: data.profile || formData });
 
-      // 切换到对话模式
-      setMode('chat');
-
-      // 如果需求完备度达到100%，显示过渡消息并跳转
-      if (data.completeness === 100) {
-        const transitionMessage: Message = {
-          role: 'assistant',
-          content: '✅ 需求采集完成！\n\n正在为您分析潜在风险...',
-        };
-        setMessages([transitionMessage]);
-
-        setTimeout(() => {
-          completeStage(Stage.REQUIREMENT_COLLECTION);
-        }, 1500);
+      // 如果验证通过且完备度达到100%，直接进入下一阶段
+      if (data.completeness === 100 && data.currentStage === Stage.RISK_ANALYSIS) {
+        // 直接进入下一阶段，不切换到对话模式
+        completeStage(Stage.REQUIREMENT_COLLECTION);
       } else {
-        // 正常显示验证结果
+        // 验证未通过或需要澄清，切换到对话模式
+        setMode('chat');
+        // 显示验证结果或澄清问题
         setMessages([{ role: 'assistant', content: data.response, options: data.options }]);
       }
     } catch (error) {
