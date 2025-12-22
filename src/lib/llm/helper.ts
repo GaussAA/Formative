@@ -35,14 +35,19 @@ export function createLLM(config?: {
 
   logger.debug('Creating LLM instance', { provider, model, baseURL });
 
-  if (!apiKey) {
+  // Ollama 不需要 API Key，使用占位符
+  const effectiveApiKey = provider === 'ollama'
+    ? (apiKey || 'ollama')
+    : apiKey;
+
+  if (!effectiveApiKey) {
     throw new Error(`LLM_API_KEY is required. Please set it in .env file.`);
   }
 
   return new ChatOpenAI({
     modelName: model,
     temperature,
-    apiKey: apiKey, // 使用apiKey而不是openAIApiKey
+    apiKey: effectiveApiKey, // 使用apiKey而不是openAIApiKey
     configuration: {
       baseURL,
     },
