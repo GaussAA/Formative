@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { RequirementProfile } from '@/types';
 import { CircularProgress } from './CircularProgress';
 import { useStage, SaveStatus } from '@/contexts/StageContext';
@@ -30,7 +30,7 @@ function formatTimeAgo(timestamp: number | null): string {
 }
 
 /**
- * 获取保存状态样式
+ * 获取保存状态样式 - 使用 useMemo 缓存样式计算
  */
 function getSaveStatusStyles(status: SaveStatus) {
   switch (status) {
@@ -119,18 +119,20 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
     setPrevProfile(profile);
   }, [profile]);
 
-  // 处理手动保存
-  const handleManualSave = async () => {
+  // 处理手动保存 - 使用 useCallback 避免不必要的函数重建
+  const handleManualSave = useCallback(async () => {
     await manualSave();
-  };
+  }, [manualSave]);
 
-  const saveStatusStyles = getSaveStatusStyles(saveStatus);
+  // 使用 useMemo 缓存保存状态样式计算
+  const saveStatusStyles = useMemo(() => getSaveStatusStyles(saveStatus), [saveStatus]);
 
-  const getHighlightClass = (key: string) => {
+  // 使用 useMemo 缓存 getHighlightClass 函数
+  const getHighlightClass = useCallback((key: string) => {
     return highlights[key]
       ? 'border-primary shadow-lg shadow-primary/20 animate-highlight-glow'
       : '';
-  };
+  }, [highlights]);
 
   return (
     <div className="w-80 bg-slate-100 border-r border-slate-200 flex flex-col shadow-sm">
@@ -364,3 +366,9 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
     </div>
   );
 }
+
+/**
+ * LeftPanel 组件 - 使用 React.memo 避免不必要的重渲染
+ * 只有当 props (completeness, profile, onViewDocument) 实际变化时才重新渲染
+ */
+export default React.memo(LeftPanel);

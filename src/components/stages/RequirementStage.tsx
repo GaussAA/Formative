@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Stage, OptionChip, RequirementProfile } from '@/types';
 import { Button } from '../shared/Button';
 import { LeftPanel } from '../shared/LeftPanel';
@@ -43,14 +43,16 @@ export function RequirementStage() {
   });
   const [coreFunctionInput, setCoreFunctionInput] = useState('');
 
-  const scrollToBottom = () => {
+  // 使用 useCallback 缓存滚动函数
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
+  // 使用 useCallback 缓存发送消息函数
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
 
@@ -122,24 +124,24 @@ export function RequirementStage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 使用 useCallback 缓存提交处理函数
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(input);
-  };
+  }, [input, sendMessage]);
 
-  const handleOptionClick = (label: string) => {
-    // 将选项的友好文本添加到输入框，而不是直接提交
+  // 使用 useCallback 缓存选项点击处理函数
+  const handleOptionClick = useCallback((label: string) => {
     setInput((prevInput) => {
-      // 如果输入框已有内容，用逗号+空格分隔
       if (prevInput.trim()) {
         return prevInput + ', ' + label;
       }
       return label;
     });
-  };
+  }, []);
 
-  // 表单相关函数
-  const handleAddCoreFunction = () => {
+  // 表单相关函数 - 使用 useCallback 缓存
+  const handleAddCoreFunction = useCallback(() => {
     if (coreFunctionInput.trim()) {
       setFormData({
         ...formData,
@@ -147,14 +149,14 @@ export function RequirementStage() {
       });
       setCoreFunctionInput('');
     }
-  };
+  }, [formData, coreFunctionInput]);
 
-  const handleRemoveCoreFunction = (index: number) => {
+  const handleRemoveCoreFunction = useCallback((index: number) => {
     setFormData({
       ...formData,
       coreFunctions: formData.coreFunctions?.filter((_, i) => i !== index),
     });
-  };
+  }, [formData]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

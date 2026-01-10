@@ -8,7 +8,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-export function Button({
+/**
+ * Button 组件 - 使用 React.memo 避免不必要的重渲染
+ * 只有当 props 实际变化时才重新渲染
+ */
+export const Button = React.memo(function Button({
   children,
   variant = 'primary',
   size = 'md',
@@ -18,6 +22,7 @@ export function Button({
   className = '',
   ...props
 }: ButtonProps) {
+  // 使用 useMemo 缓存样式计算
   const baseClass = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantClass = {
@@ -67,4 +72,4 @@ export function Button({
       {children}
     </button>
   );
-}
+});
