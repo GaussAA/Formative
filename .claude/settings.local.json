@@ -36,7 +36,11 @@
       "Bash(node:*)",
       "Bash(npx @tailwindcss/upgrade:*)",
       "Bash(pnpm format:check:*)",
-      "Bash(pnpm view:*)"
+      "Bash(pnpm view:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(netstat:*)",
+      "Bash(pnpm dev:*)"
     ]
   }
 }
