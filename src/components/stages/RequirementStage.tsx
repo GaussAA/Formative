@@ -237,7 +237,7 @@ export function RequirementStage() {
                   <button
                     onClick={() => setMode('chat')}
                     className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                      mode === 'chat'
+                      (mode as Mode) === 'chat'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
@@ -247,7 +247,7 @@ export function RequirementStage() {
                   <button
                     onClick={() => setMode('form')}
                     className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                      mode === 'form'
+                      (mode as Mode) === 'form'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
@@ -347,7 +347,7 @@ export function RequirementStage() {
                   <button
                     onClick={() => setMode('chat')}
                     className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                      mode === 'chat'
+                      (mode as Mode) === 'chat'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
@@ -357,7 +357,7 @@ export function RequirementStage() {
                   <button
                     onClick={() => setMode('form')}
                     className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                      mode === 'form'
+                      (mode as Mode) === 'form'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}

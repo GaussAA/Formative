@@ -3,6 +3,8 @@
  * 用于在浏览器本地存储和管理项目生成历史记录
  */
 
+import { Stage } from '@/types';
+
 const DB_NAME = 'FormativeDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'sessions';
@@ -13,7 +15,7 @@ export interface SessionRecord {
   createdAt: number;
   updatedAt: number;
   completed: boolean;
-  currentStage: number;
+  currentStage: Stage;
   stageData: any; // 完整的 StageData
 }
 

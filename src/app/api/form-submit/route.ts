@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
       missingFields: [],
       askedQuestions: [],
       stop: false,
+      response: '',
+      options: undefined,
+      nextQuestion: undefined,
+      finalSpec: undefined,
       metadata: {
         createdAt: Date.now(),
         updatedAt: Date.now(),

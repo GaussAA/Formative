@@ -36,7 +36,7 @@ ${JSON.stringify(state.summary, null, 2)}
     // 更新summary
     const updatedSummary = {
       ...state.summary,
-      [Stage.SPEC_GENERATION]: {
+      [Stage.DOCUMENT_GENERATION]: {
         finalSpec,
       },
     };

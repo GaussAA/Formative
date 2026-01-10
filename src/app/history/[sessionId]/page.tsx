@@ -6,7 +6,7 @@ import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
-import { StageNames } from '@/types';
+import { StageNames, MVPFeature } from '@/types';
 
 export default function HistoryDetailPage() {
   const router = useRouter();
@@ -150,7 +150,7 @@ export default function HistoryDetailPage() {
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-1">核心功能</h4>
                 <ul className="text-sm text-gray-600 list-disc list-inside">
-                  {stageData.requirement.coreFunctions.map((func, i) => (
+                  {stageData.requirement.coreFunctions.map((func: string, i: number) => (
                     <li key={i}>{func}</li>
                   ))}
                 </ul>
@@ -211,7 +211,7 @@ export default function HistoryDetailPage() {
                 <div>
                   <h4 className="text-sm font-semibold text-gray-700 mb-2">MVP 功能</h4>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    {stageData.mvpBoundary.features.filter(f => f.inMVP).map((feature, i) => (
+                    {stageData.mvpBoundary.features.filter((f: MVPFeature) => f.inMVP).map((feature: MVPFeature, i: number) => (
                       <li key={i}>✅ {feature.name}</li>
                     ))}
                   </ul>

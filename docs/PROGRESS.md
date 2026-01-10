@@ -11,6 +11,7 @@
 **定型 Formative** 是一个 AI 驱动的产品开发方案生成器，旨在帮助用户在让 AI 写代码之前，先将模糊的想法转化为清晰、可执行的开发方案。
 
 **核心价值主张**:
+
 - 不是 AI 不行，是需求没定型
 - 在写代码之前完成需求定型
 - 让用户第一次拥有 "AI 能真正执行的方案"
@@ -20,10 +21,12 @@
 ## ✅ 已完成功能
 
 ### 1. Hero 着陆页 (Landing Page)
+
 **位置**: `src/components/HeroPage.tsx`
 **路由**: `/` (根路径)
 
 **功能特性**:
+
 - 三段式价值叙事（问题-转折-结果）
 - 多个 CTA 按钮引导用户开始使用
 - 响应式设计，渐变背景，现代化 UI
@@ -35,20 +38,22 @@
 ---
 
 ### 2. 五阶段多标签工作流
+
 **位置**: `src/app/app/page.tsx`
 **路由**: `/app`
 
 #### 阶段说明
 
-| 阶段 | 名称 | 组件 | API 端点 | 功能描述 |
-|------|------|------|----------|----------|
-| 1️⃣ | 需求采集 | `RequirementStage` | `/api/chat` | 通过对话收集用户需求，动态生成选项卡片 |
-| 2️⃣ | 风险评估 | `RiskStage` | `/api/analyze-risks` | 识别风险并提供 3 种实施方案对比 |
-| 3️⃣ | 技术选型 | `TechStackStage` | `/api/tech-stack` | 推荐技术栈（前端纯静态/全栈/BaaS） |
-| 4️⃣ | MVP 规划 | `MVPStage` | `/api/mvp-plan` | 确定 MVP 边界，划分开发阶段 |
-| 5️⃣ | 文档生成 | `DocumentStage` | `/api/generate-spec` | 生成 Markdown 格式的完整开发方案文档 |
+| 阶段 | 名称     | 组件               | API 端点             | 功能描述                               |
+| ---- | -------- | ------------------ | -------------------- | -------------------------------------- |
+| 1️⃣   | 需求采集 | `RequirementStage` | `/api/chat`          | 通过对话收集用户需求，动态生成选项卡片 |
+| 2️⃣   | 风险评估 | `RiskStage`        | `/api/analyze-risks` | 识别风险并提供 3 种实施方案对比        |
+| 3️⃣   | 技术选型 | `TechStackStage`   | `/api/tech-stack`    | 推荐技术栈（前端纯静态/全栈/BaaS）     |
+| 4️⃣   | MVP 规划 | `MVPStage`         | `/api/mvp-plan`      | 确定 MVP 边界，划分开发阶段            |
+| 5️⃣   | 文档生成 | `DocumentStage`    | `/api/generate-spec` | 生成 Markdown 格式的完整开发方案文档   |
 
 #### 标签状态系统
+
 - **LOCKED** (灰色): 未解锁
 - **ACTIVE** (蓝色高亮): 当前进行中
 - **COMPLETED** (绿色): 已完成，可回滚查看
@@ -58,9 +63,11 @@
 ---
 
 ### 3. 放弃任务功能
+
 **位置**: `src/app/app/page.tsx` (Header 区域)
 
 **功能**:
+
 - 用户可随时点击"放弃任务"按钮
 - 弹出确认对话框防止误操作
 - 确认后重置所有状态：
@@ -76,21 +83,25 @@
 ### 4. 优化的加载体验
 
 #### 骨架屏加载器
+
 **位置**: `src/components/shared/SkeletonLoader.tsx`
 
 **特性**:
+
 - 3 张骨架卡片，流光动画（2s 左右滑动）
 - 渐变光晕背景，呼吸式动画（6s 循环）
 - 动态状态文字，每 2 秒切换一次
-- 按阶段定制化提示文案（风险分析/技术选型/MVP规划/文档生成）
+- 按阶段定制化提示文案（风险分析/技术选型/MVP 规划/文档生成）
 
 **应用位置**: 所有需要等待 AI 响应的阶段
+
 - `RiskStage`
 - `TechStackStage`
 - `MVPStage`
 - `DocumentStage`
 
 #### 侧边栏高亮动画
+
 **位置**: `src/components/shared/LeftPanel.tsx`
 
 **效果**: 当新信息录入时，对应卡片出现 2 秒蓝色边框高亮渐变消失效果
@@ -100,16 +111,19 @@
 ### 5. Bug 修复记录
 
 #### Bug #1: 阶段切换失效
+
 **问题**: 需求采集完成后仍停留在聊天模式，未切换到多标签页面
 **原因**: `RequirementStage.tsx` 中条件判断错误 (`data.currentStage === Stage.RISK_ANALYSIS`)
 **修复**: 简化条件为 `data.completeness === 100`，并在两处应用（聊天模式和表单模式）
 
 #### Bug #2: 重复调用 API 浪费 Token
+
 **问题**: 风险评估内容先在聊天中生成一次，然后跳转到 RiskStage 又调用一次
 **原因**: 完成时显示了旧 API 返回的风险分析文本，导致视觉闪烁和重复计算
 **修复**: 完成时不显示 AI 响应，改为显示自定义过渡消息："✅ 需求采集完成！正在为您分析潜在风险..."
 
 #### Bug #3: Stage 枚举不一致
+
 **问题**: `StageContext.tsx` 使用 `Stage.SPEC_GENERATION`，但 `types.ts` 定义为 `Stage.DOCUMENT_GENERATION`
 **修复**: 统一使用 `DOCUMENT_GENERATION`
 
@@ -118,6 +132,7 @@
 ## 🏗️ 技术架构
 
 ### 技术栈
+
 - **框架**: Next.js 14+ (App Router)
 - **语言**: TypeScript
 - **样式**: Tailwind CSS
@@ -127,9 +142,11 @@
 ### 核心设计模式
 
 #### 1. Context-based State Management
+
 **文件**: `src/contexts/StageContext.tsx`
 
 **提供的状态和方法**:
+
 ```typescript
 interface StageContextValue {
   // 状态
@@ -150,7 +167,9 @@ interface StageContextValue {
 ```
 
 #### 2. Stage Component Pattern
+
 每个阶段组件遵循统一模式：
+
 1. **初始化**: `useEffect` 检查 `stageData` 是否已有数据
 2. **数据获取**: 若无数据则调用对应 API
 3. **Loading 状态**: 显示 `<SkeletonLoader stage="xxx" />`
@@ -163,6 +182,7 @@ interface StageContextValue {
 ## 📂 关键文件说明
 
 ### 路由和页面
+
 ```
 src/app/
 ├── page.tsx                    # 根路径 → Hero 着陆页
@@ -178,6 +198,7 @@ src/app/
 ```
 
 ### 组件
+
 ```
 src/components/
 ├── HeroPage.tsx                # 着陆页组件
@@ -197,6 +218,7 @@ src/components/
 ```
 
 ### 状态和类型
+
 ```
 src/
 ├── contexts/
@@ -210,6 +232,7 @@ src/
 ## 🎨 UI/UX 特性
 
 ### 设计风格
+
 - **参考**: Linear、Notion、Modern SaaS 风格
 - **色彩**: 蓝紫渐变主题，红色用于警告/放弃，绿色用于完成
 - **动画**:
@@ -218,6 +241,7 @@ src/
   - 边框高亮渐变消失动画 (highlight-glow)
 
 ### 响应式布局
+
 - 最大宽度容器 (`max-w-6xl`, `max-w-7xl`)
 - Flexbox 和 Grid 布局
 - 适配移动端和桌面端
@@ -227,6 +251,7 @@ src/
 ## 🔄 数据流
 
 ### 需求采集阶段
+
 ```
 用户输入
   ↓
@@ -242,6 +267,7 @@ completeness = 100% → completeStage() → 进入风险评估
 ```
 
 ### 后续阶段（以风险评估为例）
+
 ```
 进入阶段
   ↓
@@ -263,18 +289,21 @@ completeStage() → 进入技术选型
 ## 🚧 待开发功能
 
 ### 短期优化
+
 - [ ] 增强错误处理和用户提示
 - [ ] 添加数据持久化（LocalStorage/数据库）
 - [ ] 支持多语言（中英文切换）
 - [ ] 导出文档功能（PDF/Markdown 下载）
 
 ### 中期功能
+
 - [ ] 用户账户系统（保存历史项目）
 - [ ] 项目版本管理（多次迭代）
 - [ ] 协作功能（多人编辑方案）
 - [ ] 模板库（预设常见场景）
 
 ### 长期规划
+
 - [ ] AI Agent 直接执行代码生成
 - [ ] 与 Cursor/GitHub Copilot 集成
 - [ ] 云端部署和 SaaS 化
@@ -285,12 +314,14 @@ completeStage() → 进入技术选型
 ## 📊 关键指标
 
 ### 当前代码规模
+
 - **总组件数**: ~15
 - **总路由数**: 7 (1 Hero + 1 App + 5 API)
 - **类型定义**: 20+ interfaces/enums
 - **代码行数**: ~2000+ LOC
 
 ### 性能目标
+
 - 首屏加载时间: < 1s
 - API 响应时间: < 3s (取决于 LLM)
 - 阶段切换动画: 流畅 60fps
@@ -300,6 +331,7 @@ completeStage() → 进入技术选型
 ## 🐛 已知问题
 
 ### 需要注意的点
+
 1. **Session 管理**: 目前 `sessionId` 由前端生成 UUID，后续可考虑后端分配
 2. **错误处理**: API 调用失败时仅 console.error，需增强用户反馈
 3. **数据丢失**: 刷新页面会丢失所有状态，需加持久化
@@ -310,6 +342,7 @@ completeStage() → 进入技术选型
 ## 🔧 开发指南
 
 ### 本地运行
+
 ```bash
 npm install
 npm run dev
@@ -317,13 +350,16 @@ npm run dev
 ```
 
 ### 环境变量
+
 创建 `.env.local` 文件：
+
 ```env
 DEEPSEEK_API_KEY=your_api_key
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 ```
 
 ### 添加新阶段
+
 1. 在 `types/index.ts` 添加新 Stage 枚举
 2. 创建新阶段组件 `src/components/stages/NewStage.tsx`
 3. 在 `StageContext.tsx` 的 tabs 数组中添加配置
@@ -335,6 +371,7 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 ## 📝 提交记录参考
 
 ### 最近的重要提交
+
 - ✅ 实现 Hero 着陆页及三段式叙事
 - ✅ 添加"放弃任务"功能及 `resetAll()` 方法
 - ✅ 重构加载体验：骨架屏 + 流光动画

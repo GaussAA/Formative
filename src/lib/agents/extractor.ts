@@ -110,6 +110,7 @@ export async function extractorNode(state: GraphStateType): Promise<Partial<Grap
           ...currentSummary,
           [Stage.RISK_ANALYSIS]: {
             ...currentSummary[Stage.RISK_ANALYSIS],
+            risks: currentSummary[Stage.RISK_ANALYSIS]?.risks || [],
             selectedApproach: userInput,
           },
         },
@@ -132,7 +133,7 @@ export async function extractorNode(state: GraphStateType): Promise<Partial<Grap
             [Stage.TECH_STACK]: {
               ...currentSummary[Stage.TECH_STACK],
               techStack,
-              userSelected: true,
+              reasoning: currentSummary[Stage.TECH_STACK]?.reasoning || '用户选择',
             },
           },
           missingFields: [],

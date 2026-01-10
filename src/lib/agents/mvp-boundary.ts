@@ -52,8 +52,7 @@ ${JSON.stringify(state.summary[Stage.TECH_STACK], null, 2)}
       ...state.summary,
       [Stage.MVP_BOUNDARY]: {
         mvpFeatures: result.mvpFeatures,
-        futureFeatures: result.futureFeatures,
-        devPlan: result.devPlan,
+        nonGoals: result.futureFeatures,
       },
     };
 
@@ -85,7 +84,7 @@ ${result.recommendation}
     logger.error('MVPBoundary node failed', { sessionId: state.sessionId, error: error.message });
     return {
       response: 'MVP边界定义完成，准备生成开发方案。',
-      currentStage: Stage.SPEC_GENERATION,
+      currentStage: Stage.DOCUMENT_GENERATION,
       needMoreInfo: false,
     };
   }
