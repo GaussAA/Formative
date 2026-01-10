@@ -53,8 +53,9 @@ ${JSON.stringify(state.summary, null, 2)}
       stop: true,
       needMoreInfo: false,
     };
-  } catch (error: any) {
-    logger.error('SpecGenerator node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('SpecGenerator node failed', { sessionId: state.sessionId, error: errorMessage });
     return {
       response: '文档生成失败，请稍后重试。',
       stop: true,

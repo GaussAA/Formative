@@ -20,6 +20,7 @@ function MermaidPreviewComponent({ code, title, onError }: MermaidPreviewProps) 
   const [showCode, setShowCode] = useState(false);
   const [showCopiedModal, setShowCopiedModal] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mermaidInstanceRef = useRef<any>(null);
 
   /**
@@ -67,12 +68,12 @@ function MermaidPreviewComponent({ code, title, onError }: MermaidPreviewProps) 
           }
 
           setIsRendering(false);
-        } catch (renderErr: any) {
+        } catch (renderErr: unknown) {
           throw renderErr;
         }
       });
-    } catch (err: any) {
-      const errorMessage = err?.message || '图表渲染失败';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '图表渲染失败';
       setError(errorMessage);
       if (onError) {
         onError(errorMessage);
@@ -152,7 +153,7 @@ function MermaidPreviewComponent({ code, title, onError }: MermaidPreviewProps) 
         {error && !isRendering && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
             <div className="flex items-start">
-              <svg className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-500 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               <div className="flex-1">

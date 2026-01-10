@@ -38,29 +38,31 @@ export async function POST(request: NextRequest) {
       profile: result.profile || {}, // 返回当前需求画像
       askedQuestions: result.askedQuestions || [], // 返回已问问题
     });
-  } catch (error: any) {
-    logger.error('Chat API error', { error: error.message, stack: error.stack });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error('Chat API error', { error: errorMessage, stack: errorStack });
 
     // 区分不同类型的错误
-    let errorMessage = '系统错误，请稍后重试';
+    let responseMessage = '系统错误，请稍后重试';
     let statusCode = 500;
 
-    if (error.message.includes('LLM_API_KEY')) {
-      errorMessage = '❌ LLM配置错误：请检查.env文件中的API密钥配置';
+    if (errorMessage.includes('LLM_API_KEY')) {
+      responseMessage = '❌ LLM配置错误：请检查.env文件中的API密钥配置';
       statusCode = 503;
-    } else if (error.message.includes('信息提取失败')) {
-      errorMessage = `❌ ${error.message}`;
+    } else if (errorMessage.includes('信息提取失败')) {
+      responseMessage = `❌ ${errorMessage}`;
       statusCode = 503;
-    } else if (error.message.includes('Failed to parse JSON')) {
-      errorMessage = '❌ LLM返回格式错误，请重试或检查模型配置';
+    } else if (errorMessage.includes('Failed to parse JSON')) {
+      responseMessage = '❌ LLM返回格式错误，请重试或检查模型配置';
       statusCode = 503;
     }
 
     return NextResponse.json(
       {
         error: true,
-        message: errorMessage,
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        message: responseMessage,
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       },
       { status: statusCode }
     );

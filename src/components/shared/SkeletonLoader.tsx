@@ -49,7 +49,7 @@ export function SkeletonLoader({ stage }: SkeletonLoaderProps) {
   return (
     <div className="flex items-center justify-center min-h-[500px] relative overflow-hidden">
       {/* Gradient Glow Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 animate-gradient-shift"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 animate-gradient-shift"></div>
 
       <div className="relative z-10 w-full max-w-4xl px-6">
         {/* Skeleton Cards */}
@@ -60,7 +60,7 @@ export function SkeletonLoader({ stage }: SkeletonLoaderProps) {
               className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 relative overflow-hidden"
             >
               {/* Shimmer Effect */}
-              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
+              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/60 to-transparent"></div>
 
               {/* Skeleton Content */}
               <div className="space-y-3">

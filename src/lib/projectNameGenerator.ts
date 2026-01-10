@@ -29,11 +29,13 @@ export function generateProjectName(stageData: StageData): string {
 
     // 提取第一句话或前 30 个字符
     const firstSentence = goal.split(/[。！？\.\!\?]/)[0];
-    const shortName = firstSentence.length > 30
-      ? firstSentence.substring(0, 27) + '...'
-      : firstSentence;
+    if (firstSentence) {
+      const shortName = firstSentence.length > 30
+        ? firstSentence.substring(0, 27) + '...'
+        : firstSentence;
 
-    return shortName || '未命名项目';
+      return shortName || '未命名项目';
+    }
   }
 
   // 方案 4: 从目标用户和核心功能组合
@@ -46,8 +48,11 @@ export function generateProjectName(stageData: StageData): string {
     }
 
     if (stageData.requirement.coreFunctions && stageData.requirement.coreFunctions.length > 0) {
-      const func = stageData.requirement.coreFunctions[0].substring(0, 10);
-      parts.push(func);
+      const firstFunc = stageData.requirement.coreFunctions[0];
+      if (firstFunc) {
+        const func = firstFunc.substring(0, 10);
+        parts.push(func);
+      }
     }
 
     if (parts.length > 0) {

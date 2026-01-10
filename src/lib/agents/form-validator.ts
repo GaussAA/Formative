@@ -61,6 +61,10 @@ ${JSON.stringify(state.profile, null, 2)}
     if (!result.isValid && result.clarificationQuestions && result.clarificationQuestions.length > 0) {
       // 有需要澄清的问题
       const firstQuestion = result.clarificationQuestions[0];
+      if (!firstQuestion) {
+        throw new Error('clarificationQuestions is empty');
+      }
+
       const message = `我们检查了您提交的信息，有几个地方需要确认一下：
 
 ${result.issues.map((issue, i) => `${i + 1}. **${issue.field}**: ${issue.issue}`).join('\n')}
@@ -106,10 +110,11 @@ ${result.recommendation}
       currentStage: Stage.RISK_ANALYSIS, // 直接进入风险分析阶段
       completeness: 100,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('FormValidator node failed', {
       sessionId: state.sessionId,
-      error: error.message,
+      error: errorMessage,
     });
 
     // 验证失败，保守处理：进入对话模式

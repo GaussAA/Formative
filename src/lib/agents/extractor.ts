@@ -4,7 +4,7 @@
  */
 
 import { GraphStateType } from '../graph/state';
-import { Stage } from '@/types';
+import { Stage, RequirementProfile } from '@/types';
 import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
@@ -27,9 +27,16 @@ interface ExtractorResponse {
 
 /**
  * 简单规则提取（备用方案）
+ *
+ * @param userInput - 用户输入
+ * @param currentProfile - 当前需求画像
+ * @returns 提取的需求信息
  */
-function simpleExtract(userInput: string, currentProfile: any): any {
-  const extracted: any = {};
+function simpleExtract(
+  userInput: string,
+  currentProfile: RequirementProfile
+): Partial<RequirementProfile> {
+  const extracted: Partial<RequirementProfile> = {};
   const input = userInput.toLowerCase();
 
   // 确保 currentProfile 不为空
@@ -190,14 +197,17 @@ ${JSON.stringify(currentProfile, null, 2)}
       missingFields: result.missingFields,
       // 不传递nextQuestion和options，避免污染状态
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
     logger.error('Extractor LLM call failed - System Error', {
       sessionId: state.sessionId,
-      error: error.message,
-      stack: error.stack,
+      error: errorMessage,
+      stack: errorStack,
     });
 
     // LLM失败时，抛出错误，不要降级
-    throw new Error(`信息提取失败: ${error.message}。请检查LLM配置或稍后重试。`);
+    throw new Error(`信息提取失败: ${errorMessage}。请检查LLM配置或稍后重试。`);
   }
 }

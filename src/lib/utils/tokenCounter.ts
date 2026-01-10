@@ -25,12 +25,13 @@ export function logTokenUsage(
   component: string,
   prompt: string,
   response: string,
-  logger: any = console
+  logger?: Pick<Console, 'info'>
 ): void {
+  const targetLogger = logger ?? console;
   const promptTokens = estimateTokens(prompt);
   const responseTokens = estimateTokens(response);
 
-  logger.info('Token usage', {
+  targetLogger.info('Token usage', {
     component,
     promptTokens,
     responseTokens,

@@ -14,7 +14,7 @@ export interface LogEntry {
   level: LogLevel;
   timestamp: number;
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   agent?: string;
   sessionId?: string;
 }
@@ -28,7 +28,7 @@ class Logger {
     this.minLevel = minLevel;
   }
 
-  private log(level: LogLevel, message: string, context?: Record<string, any>) {
+  private log(level: LogLevel, message: string, context?: Record<string, unknown>) {
     if (level < this.minLevel) return;
 
     const entry: LogEntry = {
@@ -51,9 +51,11 @@ class Logger {
 
     switch (level) {
       case LogLevel.DEBUG:
+        // eslint-disable-next-line no-console
         console.debug(`[${levelName}] ${message}${contextStr}`);
         break;
       case LogLevel.INFO:
+        // eslint-disable-next-line no-console
         console.info(`[${levelName}] ${message}${contextStr}`);
         break;
       case LogLevel.WARN:
@@ -65,24 +67,24 @@ class Logger {
     }
   }
 
-  debug(message: string, context?: Record<string, any>) {
+  debug(message: string, context?: Record<string, unknown>) {
     this.log(LogLevel.DEBUG, message, context);
   }
 
-  info(message: string, context?: Record<string, any>) {
+  info(message: string, context?: Record<string, unknown>) {
     this.log(LogLevel.INFO, message, context);
   }
 
-  warn(message: string, context?: Record<string, any>) {
+  warn(message: string, context?: Record<string, unknown>) {
     this.log(LogLevel.WARN, message, context);
   }
 
-  error(message: string, context?: Record<string, any>) {
+  error(message: string, context?: Record<string, unknown>) {
     this.log(LogLevel.ERROR, message, context);
   }
 
   // Agent专用日志
-  agent(agentName: string, sessionId: string, message: string, context?: Record<string, any>) {
+  agent(agentName: string, sessionId: string, message: string, context?: Record<string, unknown>) {
     this.info(message, {
       ...context,
       agent: agentName,

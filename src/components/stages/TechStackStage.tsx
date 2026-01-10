@@ -80,7 +80,7 @@ export function TechStackStage() {
     fetchTechStackOptions(userPreferences);
   };
 
-  const fetchTechStackOptions = async (userPreferences?: any) => {
+  const fetchTechStackOptions = async (userPreferences?: { frontend?: string[]; backend?: string[]; database?: string[] }) => {
     setLoading(true);
     try {
       const response = await fetch('/api/tech-stack', {
@@ -123,9 +123,14 @@ export function TechStackStage() {
       return;
     }
 
+    if (!stageData.techStack) {
+      alert('技术栈数据尚未准备好');
+      return;
+    }
+
     updateStageData({
       techStack: {
-        ...stageData.techStack!,
+        ...stageData.techStack,
         selected,
       },
     });

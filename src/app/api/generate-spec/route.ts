@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callLLM } from '@/lib/llm/helper';
 import promptManager, { PromptType } from '@/lib/prompts';
 import logger from '@/lib/logger';
-import { RequirementProfile, TechStackOption, MVPFeature, DevPlan } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,14 +71,16 @@ ${mvpBoundary ? `MVP边界：\n${JSON.stringify(mvpBoundary, null, 2)}` : ''}
     return NextResponse.json({
       document,
     });
-  } catch (error: any) {
-    logger.error('Generate spec API error', { error: error.message, stack: error.stack });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error('Generate spec API error', { error: errorMessage, stack: errorStack });
 
     return NextResponse.json(
       {
         error: true,
         message: '文档生成失败，请稍后重试',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       },
       { status: 500 }
     );
@@ -87,7 +88,18 @@ ${mvpBoundary ? `MVP边界：\n${JSON.stringify(mvpBoundary, null, 2)}` : ''}
 }
 
 // 生成图表章节的 Markdown 内容
-function generateDiagramsSection(diagrams: any): string {
+interface DiagramsData {
+  architectureDiagram?: {
+    mermaidCode: string;
+    description?: string;
+  };
+  sequenceDiagram?: {
+    mermaidCode: string;
+    description?: string;
+  };
+}
+
+function generateDiagramsSection(diagrams: DiagramsData): string {
   let section = '## 系统设计图\n\n';
 
   if (diagrams.architectureDiagram) {

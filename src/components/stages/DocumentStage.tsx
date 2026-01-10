@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Stage } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Button } from '../shared/Button';
 import { Badge } from '../shared/Badge';
@@ -13,7 +12,6 @@ export function DocumentStage() {
   const { stageData, updateStageData, sessionId } = useStage();
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<string>('');
-  const [downloading, setDownloading] = useState(false);
   const [showCopiedModal, setShowCopiedModal] = useState(false);
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
 

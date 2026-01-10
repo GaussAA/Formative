@@ -209,10 +209,11 @@ export async function runWorkflow(sessionId: string, userInput: string) {
     });
 
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Workflow execution failed', {
       sessionId,
-      error: error.message,
+      error: errorMessage,
     });
     throw error;
   }
@@ -275,10 +276,11 @@ export async function continueWorkflow(sessionId: string, userInput: string) {
     });
 
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Failed to continue workflow', {
       sessionId,
-      error: error.message,
+      error: errorMessage,
     });
     throw error;
   }

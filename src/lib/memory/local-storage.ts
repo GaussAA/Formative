@@ -11,6 +11,17 @@ import logger from '@/lib/logger';
 
 const DATA_DIR = path.join(process.cwd(), 'data', 'sessions');
 
+/**
+ * Node.js 错误类型守卫
+ */
+function isNodeError(error: unknown): error is { code: string } & Error {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    typeof (error as Record<string, unknown>).code === 'string'
+  );
+}
+
 export class LocalJSONStorage implements MemoryStorage {
   constructor() {
     this.ensureDataDir();
@@ -33,8 +44,8 @@ export class LocalJSONStorage implements MemoryStorage {
       const filePath = this.getSessionPath(sessionId);
       const data = await fs.readFile(filePath, 'utf-8');
       return JSON.parse(data);
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+      if (isNodeError(error) && error.code === 'ENOENT') {
         return null;
       }
       logger.error('Failed to read session', { sessionId, error });
@@ -132,8 +143,8 @@ export class LocalJSONStorage implements MemoryStorage {
       const filePath = this.getSessionPath(sessionId);
       await fs.unlink(filePath);
       logger.info('Session deleted', { sessionId });
-    } catch (error: any) {
-      if (error.code !== 'ENOENT') {
+    } catch (error: unknown) {
+      if (!isNodeError(error) || error.code !== 'ENOENT') {
         logger.error('Failed to delete session', { sessionId, error });
       }
     }

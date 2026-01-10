@@ -30,8 +30,9 @@ class PromptManager {
    */
   async getPrompt(type: PromptType): Promise<string> {
     // 优先从缓存读取
-    if (this.cache.has(type)) {
-      return this.cache.get(type)!;
+    const cached = this.cache.get(type);
+    if (cached) {
+      return cached;
     }
 
     try {
