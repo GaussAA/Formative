@@ -1,9 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Stage, TabStatus, TabConfig, StageData, RequirementProfile } from '@/types';
 import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
 import { generateProjectName } from '@/lib/projectNameGenerator';
+
+/** 保存状态 */
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface StageContextValue {
   // 当前状态
@@ -22,6 +25,11 @@ interface StageContextValue {
   sessionId: string | null;
   setSessionId: (id: string) => void;
 
+  // 保存状态
+  saveStatus: SaveStatus;
+  lastSavedAt: number | null;
+  manualSave: () => Promise<void>;
+
   // 重置功能
   resetAll: () => void;
 }
@@ -31,6 +39,16 @@ const StageContext = createContext<StageContextValue | undefined>(undefined);
 export function StageProvider({ children }: { children: React.ReactNode }) {
   const [currentStage, setCurrentStageState] = useState<Stage>(Stage.REQUIREMENT_COLLECTION);
   const [sessionId, setSessionId] = useState<string | null>(null);
+
+  // 保存状态管理
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+
+  // Refs 用于防抖保存逻辑
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSavingRef = useRef(false);
+  const lastSaveTimeRef = useRef<number>(0);
+  const DEBOUNCE_MS = 2000; // 防抖延迟：2秒
 
   const [tabs, setTabs] = useState<TabConfig[]>([
     {
@@ -81,44 +99,99 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     requirement: {},
   });
 
-  // 保存会话到 IndexedDB
-  const saveSessionToStorage = useCallback(async () => {
-    if (!sessionId) return;
+  /**
+   * 执行实际的保存操作
+   */
+  const performSave = useCallback(async (currentStageValue: Stage, stageDataValue: StageData): Promise<void> => {
+    if (!sessionId || isSavingRef.current) return;
+
+    // 检查距离上次保存的时间，避免频繁写入
+    const timeSinceLastSave = Date.now() - lastSaveTimeRef.current;
+    if (timeSinceLastSave < DEBOUNCE_MS) {
+      return;
+    }
+
+    isSavingRef.current = true;
+    setSaveStatus('saving');
 
     try {
       const session: SessionRecord = {
         sessionId,
-        projectName: generateProjectName(stageData), // 使用智能生成的项目名称
-        createdAt: Date.now(), // 首次创建时会被保留
+        projectName: generateProjectName(stageDataValue),
+        createdAt: Date.now(),
         updatedAt: Date.now(),
-        completed: currentStage === Stage.DOCUMENT_GENERATION && !!stageData.finalSpec,
-        currentStage,
-        stageData,
+        completed: currentStageValue === Stage.DOCUMENT_GENERATION && !!stageDataValue.finalSpec,
+        currentStage: currentStageValue,
+        stageData: stageDataValue,
       };
 
-      // 检查是否已存在，如果存在则保留原创建时间
+      // 保留原创建时间
       const existing = await sessionStorage.getSession(sessionId);
       if (existing) {
         session.createdAt = existing.createdAt;
       }
 
       await sessionStorage.saveSession(session);
+
+      lastSaveTimeRef.current = Date.now();
+      setLastSavedAt(Date.now());
+      setSaveStatus('saved');
+
+      // 2秒后重置状态为 idle
+      setTimeout(() => {
+        if (saveStatus === 'saved') {
+          setSaveStatus('idle');
+        }
+      }, 2000);
     } catch (error) {
-      console.error('Failed to save session to storage:', error);
+      console.error('Failed to save session:', error);
+      setSaveStatus('error');
+    } finally {
+      isSavingRef.current = false;
     }
-  }, [sessionId, currentStage, stageData]);
+  }, [sessionId, saveStatus]);
 
-  // 当会话数据变化时，自动保存
+  /**
+   * 防抖保存：延迟执行保存操作
+   */
+  const scheduleSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = setTimeout(() => {
+      performSave(currentStage, stageData);
+    }, DEBOUNCE_MS);
+  }, [currentStage, stageData, performSave]);
+
+  /**
+   * 手动保存：立即执行保存（绕过防抖）
+   */
+  const manualSave = useCallback(async (): Promise<void> => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    // 强制更新最后保存时间，允许立即保存
+    lastSaveTimeRef.current = 0;
+    await performSave(currentStage, stageData);
+  }, [currentStage, stageData, performSave]);
+
+  /**
+   * 当会话数据变化时，调度防抖保存
+   */
   useEffect(() => {
-    if (sessionId && stageData.requirement.productGoal) {
-      // 延迟保存，避免频繁写入
-      const timer = setTimeout(() => {
-        saveSessionToStorage();
-      }, 500);
-
-      return () => clearTimeout(timer);
+    if (sessionId && stageData.requirement && Object.keys(stageData.requirement).length > 0) {
+      scheduleSave();
     }
-  }, [sessionId, stageData, saveSessionToStorage]);
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [sessionId, stageData, currentStage, scheduleSave]);
 
   const setCurrentStage = useCallback((stage: Stage) => {
     setCurrentStageState(stage);
@@ -241,6 +314,9 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     goToStage,
     sessionId,
     setSessionId,
+    saveStatus,
+    lastSavedAt,
+    manualSave,
     resetAll,
   };
 
