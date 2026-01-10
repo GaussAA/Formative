@@ -64,23 +64,20 @@ export async function callLLMWithJSON<T = any>(
 ): Promise<T> {
   const llm = createLLM();
 
-  const messages = [
-    new SystemMessage(systemPrompt),
+  // 构建消息数组，使用符合 LangChain 0.3.x 的格式
+  const messages: any[] = [
+    { role: 'system', content: systemPrompt },
   ];
 
   // 添加对话历史
   if (conversationHistory && conversationHistory.length > 0) {
     for (const msg of conversationHistory) {
-      if (msg.role === 'user') {
-        messages.push(new HumanMessage(msg.content));
-      } else if (msg.role === 'assistant') {
-        messages.push(new AIMessage(msg.content));
-      }
+      messages.push({ role: msg.role, content: msg.content });
     }
   }
 
   // 添加当前用户消息
-  messages.push(new HumanMessage(userMessage));
+  messages.push({ role: 'user', content: userMessage });
 
   try {
     const response = await llm.invoke(messages);
@@ -118,23 +115,20 @@ export async function callLLM(
 ): Promise<string> {
   const llm = createLLM();
 
-  const messages = [
-    new SystemMessage(systemPrompt),
+  // 构建消息数组，使用符合 LangChain 0.3.x 的格式
+  const messages: any[] = [
+    { role: 'system', content: systemPrompt },
   ];
 
   // 添加对话历史
   if (conversationHistory && conversationHistory.length > 0) {
     for (const msg of conversationHistory) {
-      if (msg.role === 'user') {
-        messages.push(new HumanMessage(msg.content));
-      } else if (msg.role === 'assistant') {
-        messages.push(new AIMessage(msg.content));
-      }
+      messages.push({ role: msg.role, content: msg.content });
     }
   }
 
   // 添加当前用户消息
-  messages.push(new HumanMessage(userMessage));
+  messages.push({ role: 'user', content: userMessage });
 
   try {
     const response = await llm.invoke(messages);
