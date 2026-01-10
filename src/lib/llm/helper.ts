@@ -6,17 +6,24 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages';
 import logger from '@/lib/logger';
+import { getLLMConfig, LLMConfig } from './config';
 
 // 创建LLM实例（兼容OpenAI API的提供商）
 export function createLLM(config?: {
   provider?: string;
   model?: string;
   temperature?: number;
+  maxTokens?: number;
+  agentType?: string; // Agent 类型，用于获取预设配置
 }) {
+  // 如果提供了 agentType，从配置文件获取预设参数
+  const llmConfig = config?.agentType ? getLLMConfig(config.agentType) : null;
+
   const provider = config?.provider || process.env.LLM_PROVIDER || 'deepseek';
   const model = config?.model || process.env.LLM_MODEL || 'deepseek-chat';
   const apiKey = process.env.LLM_API_KEY;
-  const temperature = config?.temperature ?? 0.7;
+  const temperature = config?.temperature ?? llmConfig?.temperature ?? 0.7;
+  const maxTokens = config?.maxTokens ?? llmConfig?.maxTokens;
 
   // 根据provider设置baseURL
   let baseURL = process.env.LLM_BASE_URL;
@@ -33,7 +40,14 @@ export function createLLM(config?: {
     }
   }
 
-  logger.debug('Creating LLM instance', { provider, model, baseURL });
+  logger.debug('Creating LLM instance', {
+    provider,
+    model,
+    baseURL,
+    temperature,
+    maxTokens,
+    agentType: config?.agentType,
+  });
 
   // Ollama 不需要 API Key，使用占位符
   const effectiveApiKey = provider === 'ollama'
@@ -44,14 +58,21 @@ export function createLLM(config?: {
     throw new Error(`LLM_API_KEY is required. Please set it in .env file.`);
   }
 
-  return new ChatOpenAI({
+  const llmParams: any = {
     modelName: model,
     temperature,
-    apiKey: effectiveApiKey, // 使用apiKey而不是openAIApiKey
+    apiKey: effectiveApiKey,
     configuration: {
       baseURL,
     },
-  });
+  };
+
+  // 如果设置了 maxTokens，添加到参数中
+  if (maxTokens !== undefined) {
+    llmParams.maxTokens = maxTokens;
+  }
+
+  return new ChatOpenAI(llmParams);
 }
 
 /**
@@ -135,6 +156,93 @@ export async function callLLM(
     return response.content.toString();
   } catch (error: any) {
     logger.error('LLM call failed', { error: error.message });
+    throw error;
+  }
+}
+
+/**
+ * 调用LLM并解析JSON响应 - 使用 Agent 配置
+ * 根据指定的 agentType 从配置文件获取优化的参数
+ */
+export async function callLLMWithJSONByAgent<T = any>(
+  agentType: string,
+  systemPrompt: string,
+  userMessage: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): Promise<T> {
+  const llm = createLLM({ agentType });
+
+  // 构建消息数组，使用符合 LangChain 0.3.x 的格式
+  const messages: any[] = [
+    { role: 'system', content: systemPrompt },
+  ];
+
+  // 添加对话历史
+  if (conversationHistory && conversationHistory.length > 0) {
+    for (const msg of conversationHistory) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+
+  // 添加当前用户消息
+  messages.push({ role: 'user', content: userMessage });
+
+  try {
+    const response = await llm.invoke(messages);
+    const content = response.content.toString();
+
+    logger.debug('LLM response received', { agentType, length: content.length });
+
+    // 尝试解析JSON
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+    const jsonStr = jsonMatch ? jsonMatch[1] : content;
+
+    try {
+      return JSON.parse(jsonStr.trim()) as T;
+    } catch (parseError) {
+      logger.warn('Failed to parse JSON from LLM response', {
+        agentType,
+        content: content.substring(0, 200),
+      });
+      throw new Error(`Failed to parse JSON: ${parseError}`);
+    }
+  } catch (error: any) {
+    logger.error('LLM call failed', { agentType, error: error.message });
+    throw error;
+  }
+}
+
+/**
+ * 调用LLM并返回文本响应 - 使用 Agent 配置
+ */
+export async function callLLMByAgent(
+  agentType: string,
+  systemPrompt: string,
+  userMessage: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): Promise<string> {
+  const llm = createLLM({ agentType });
+
+  // 构建消息数组，使用符合 LangChain 0.3.x 的格式
+  const messages: any[] = [
+    { role: 'system', content: systemPrompt },
+  ];
+
+  // 添加对话历史
+  if (conversationHistory && conversationHistory.length > 0) {
+    for (const msg of conversationHistory) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+
+  // 添加当前用户消息
+  messages.push({ role: 'user', content: userMessage });
+
+  try {
+    const response = await llm.invoke(messages);
+    return response.content.toString();
+  } catch (error: any) {
+    logger.error('LLM call failed', { agentType, error: error.message });
     throw error;
   }
 }

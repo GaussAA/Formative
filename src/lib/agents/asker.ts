@@ -4,7 +4,7 @@
  */
 
 import { GraphStateType } from '../graph/state';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -42,7 +42,11 @@ ${(state.askedQuestions || []).join('\n')}
 3. 生成的选项要与问题匹配
 `;
 
-    const result = await callLLMWithJSON<AskerResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<AskerResponse>(
+      'asker', // 使用 asker 配置：temperature: 0.5, maxTokens: 500
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('Asker', state.sessionId, 'Question generated', {
       question: result.message,

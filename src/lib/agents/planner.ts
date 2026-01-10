@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -83,7 +83,11 @@ ${JSON.stringify(state.profile, null, 2)}
 请评估需求完备度，判断是否可以进入下一阶段。
 `;
 
-    const result = await callLLMWithJSON<PlannerResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<PlannerResponse>(
+      'planner', // 使用 planner 配置：temperature: 0.2, maxTokens: 800
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('Planner', state.sessionId, 'Completeness evaluated', {
       completeness: result.completeness,

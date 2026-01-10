@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -46,7 +46,11 @@ ${JSON.stringify(state.profile, null, 2)}
 如果有问题，请指出需要澄清的地方。
 `;
 
-    const result = await callLLMWithJSON<FormValidatorResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<FormValidatorResponse>(
+      'formValidator', // 使用 formValidator 配置：temperature: 0.2, maxTokens: 1000
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('FormValidator', state.sessionId, 'Validation completed', {
       isValid: result.isValid,

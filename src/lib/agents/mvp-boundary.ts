@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -40,7 +40,11 @@ ${JSON.stringify(state.summary[Stage.TECH_STACK], null, 2)}
 明确哪些功能应该放在第一版本，哪些可以延后。
 `;
 
-    const result = await callLLMWithJSON<MVPBoundaryResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<MVPBoundaryResponse>(
+      'mvp', // 使用 mvp 配置：temperature: 0.3, maxTokens: 1500
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('MVPBoundary', state.sessionId, 'MVP boundaries defined', {
       mvpFeaturesCount: result.mvpFeatures.length,

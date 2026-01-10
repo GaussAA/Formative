@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -164,7 +164,8 @@ ${JSON.stringify(currentProfile, null, 2)}
 3. 不要删除或覆盖已有字段
 `;
 
-    const result = await callLLMWithJSON<ExtractorResponse>(
+    const result = await callLLMWithJSONByAgent<ExtractorResponse>(
+      'extractor', // 使用 extractor 配置：temperature: 0.1, maxTokens: 1000
       systemPrompt,
       contextMessage,
       state.messages.slice(-5) // 保留最近5轮对话作为上下文

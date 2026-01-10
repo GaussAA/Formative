@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -50,7 +50,11 @@ ${JSON.stringify(state.summary[Stage.RISK_ANALYSIS], null, 2)}
 请根据需求和风险分析结果，推荐合适的技术方案。
 `;
 
-    const result = await callLLMWithJSON<TechAdvisorResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<TechAdvisorResponse>(
+      'tech', // 使用 tech 配置：temperature: 0.3, maxTokens: 1500
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('TechAdvisor', state.sessionId, 'Tech recommendations provided', {
       recommendedCategory: result.recommendedCategory,

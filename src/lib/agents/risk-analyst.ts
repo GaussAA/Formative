@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLMWithJSON } from '../llm/helper';
+import { callLLMWithJSONByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -39,7 +39,11 @@ ${JSON.stringify(state.profile, null, 2)}
 请分析潜在风险并提供2-3种可选方案。
 `;
 
-    const result = await callLLMWithJSON<RiskAnalystResponse>(systemPrompt, contextMessage);
+    const result = await callLLMWithJSONByAgent<RiskAnalystResponse>(
+      'risk', // 使用 risk 配置：temperature: 0.3, maxTokens: 1500
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('RiskAnalyst', state.sessionId, 'Risks analyzed', {
       risksCount: result.risks.length,

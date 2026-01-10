@@ -5,7 +5,7 @@
 
 import { GraphStateType } from '../graph/state';
 import { Stage } from '@/types';
-import { callLLM } from '../llm/helper';
+import { callLLMByAgent } from '../llm/helper';
 import promptManager, { PromptType } from '../prompts';
 import logger from '../logger';
 
@@ -27,7 +27,11 @@ ${JSON.stringify(state.summary, null, 2)}
 请按照9章节结构生成完整的Markdown文档。
 `;
 
-    const finalSpec = await callLLM(systemPrompt, contextMessage);
+    const finalSpec = await callLLMByAgent(
+      'spec', // 使用 spec 配置：temperature: 0.2, maxTokens: 4000
+      systemPrompt,
+      contextMessage
+    );
 
     logger.agent('SpecGenerator', state.sessionId, 'Specification document generated', {
       length: finalSpec.length,
