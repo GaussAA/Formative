@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Modal } from './Modal';
 
 interface MermaidPreviewProps {
@@ -9,66 +9,99 @@ interface MermaidPreviewProps {
   onError?: (error: string) => void;
 }
 
-export function MermaidPreview({ code, title, onError }: MermaidPreviewProps) {
+/**
+ * MermaidPreview 组件 - 使用 React.memo 避免不必要的重渲染
+ * 添加防抖优化和 requestAnimationFrame 提升渲染性能
+ */
+function MermaidPreviewComponent({ code, title, onError }: MermaidPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isRendering, setIsRendering] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
   const [showCopiedModal, setShowCopiedModal] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const mermaidInstanceRef = useRef<any>(null);
 
-  useEffect(() => {
+  /**
+   * 使用 useCallback 缓存渲染函数
+   * 添加 requestAnimationFrame 优化渲染时序
+   */
+  const renderDiagram = useCallback(async () => {
     if (!code || !containerRef.current) return;
 
-    const renderDiagram = async () => {
-      setIsRendering(true);
-      setError(null);
+    setIsRendering(true);
+    setError(null);
 
-      try {
-        // 动态导入 mermaid
-        const mermaid = (await import('mermaid')).default;
+    try {
+      // 动态导入 mermaid（只导入一次）
+      if (!mermaidInstanceRef.current) {
+        const mermaidModule = await import('mermaid');
+        mermaidInstanceRef.current = mermaidModule.default;
 
-        // 配置 mermaid
-        mermaid.initialize({
+        // 配置 mermaid（只配置一次）
+        mermaidInstanceRef.current.initialize({
           startOnLoad: false,
           theme: 'default',
           securityLevel: 'loose',
           fontFamily: 'ui-sans-serif, system-ui, sans-serif',
         });
-
-        // 清空容器
-        if (containerRef.current) {
-          containerRef.current.innerHTML = '';
-        }
-
-        // 生成唯一 ID
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-
-        // 渲染图表
-        const { svg } = await mermaid.render(id, code);
-
-        // 插入 SVG
-        if (containerRef.current) {
-          containerRef.current.innerHTML = svg;
-        }
-
-        setIsRendering(false);
-      } catch (err: any) {
-        const errorMessage = err?.message || '图表渲染失败';
-        setError(errorMessage);
-        if (onError) {
-          onError(errorMessage);
-        }
-        setIsRendering(false);
       }
-    };
 
-    renderDiagram();
+      const mermaid = mermaidInstanceRef.current;
+
+      // 清空容器
+      containerRef.current.innerHTML = '';
+
+      // 生成唯一 ID
+      const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+
+      // 使用 requestAnimationFrame 确保在下一帧渲染
+      requestAnimationFrame(async () => {
+        try {
+          // 渲染图表
+          const { svg } = await mermaid.render(id, code);
+
+          // 插入 SVG
+          if (containerRef.current) {
+            containerRef.current.innerHTML = svg;
+          }
+
+          setIsRendering(false);
+        } catch (renderErr: any) {
+          throw renderErr;
+        }
+      });
+    } catch (err: any) {
+      const errorMessage = err?.message || '图表渲染失败';
+      setError(errorMessage);
+      if (onError) {
+        onError(errorMessage);
+      }
+      setIsRendering(false);
+    }
   }, [code, onError]);
 
-  const handleCopyCode = () => {
+  useEffect(() => {
+    // 添加 300ms 防抖，避免频繁渲染
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      renderDiagram();
+    }, 300);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [renderDiagram]);
+
+  const handleCopyCode = useCallback(() => {
     navigator.clipboard.writeText(code);
     setShowCopiedModal(true);
-  };
+  }, [code]);
 
   return (
     <>
@@ -154,3 +187,9 @@ export function MermaidPreview({ code, title, onError }: MermaidPreviewProps) {
     </>
   );
 }
+
+/**
+ * 使用 React.memo 包装组件，避免不必要的重渲染
+ * 只有当 code、title、onError 变化时才重新渲染
+ */
+export const MermaidPreview = memo(MermaidPreviewComponent);
