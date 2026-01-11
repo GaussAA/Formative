@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Production
+build
+dist
+out
+.next
+
+# Misc
+.DS_Store
+*.pem
+.env*
+
+# Logs
+logs
+*.log
+
+# Cache
+.turbo
+.cache
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output

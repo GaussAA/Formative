@@ -26,7 +26,7 @@ export function Sidebar({ completeness, profile }: SidebarProps) {
         </div>
         <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-700 ease-out"
+            className="bg-linear-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-700 ease-out"
             style={{ width: `${completeness}%` }}
           ></div>
         </div>

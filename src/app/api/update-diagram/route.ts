@@ -73,10 +73,11 @@ ${techStack ? `技术栈（供参考）：\n${JSON.stringify(techStack, null, 2)
     logger.info('Diagram updated successfully', { diagramType });
 
     return NextResponse.json(response);
-  } catch (error: any) {
-    logger.error('Error in update-diagram API:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Error in update-diagram API:', { error: errorMessage });
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: errorMessage || 'Internal server error' },
       { status: 500 }
     );
   }

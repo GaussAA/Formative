@@ -1,9 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { Stage, TabStatus, TabConfig, StageData, RequirementProfile } from '@/types';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useTransition } from 'react';
+import { Stage, TabStatus, TabConfig, StageData } from '@/types';
 import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
 import { generateProjectName } from '@/lib/projectNameGenerator';
+import { DEBOUNCE_MS, SAVE_STATUS_RESET_MS } from '@/config/constants';
+import { INITIAL_TABS } from '@/config/tabs';
 
 /** 保存状态 */
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -32,11 +34,17 @@ interface StageContextValue {
 
   // 重置功能
   resetAll: () => void;
+
+  // React 19 transition state
+  isTransitionPending: boolean;
 }
 
 const StageContext = createContext<StageContextValue | undefined>(undefined);
 
 export function StageProvider({ children }: { children: React.ReactNode }) {
+  // React 19: useTransition for non-urgent state updates
+  const [isTransitionPending, startTransition] = useTransition();
+
   const [currentStage, setCurrentStageState] = useState<Stage>(Stage.REQUIREMENT_COLLECTION);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -46,54 +54,11 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
 
   // Refs 用于防抖保存逻辑
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const saveStatusResetTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const lastSaveTimeRef = useRef<number>(0);
-  const DEBOUNCE_MS = 2000; // 防抖延迟：2秒
 
-  const [tabs, setTabs] = useState<TabConfig[]>([
-    {
-      id: 1,
-      stage: Stage.REQUIREMENT_COLLECTION,
-      name: '需求采集',
-      icon: '📝',
-      status: TabStatus.ACTIVE,
-    },
-    {
-      id: 2,
-      stage: Stage.RISK_ANALYSIS,
-      name: '风险评估',
-      icon: '⚠️',
-      status: TabStatus.LOCKED,
-    },
-    {
-      id: 3,
-      stage: Stage.TECH_STACK,
-      name: '技术选型',
-      icon: '🔧',
-      status: TabStatus.LOCKED,
-    },
-    {
-      id: 4,
-      stage: Stage.MVP_BOUNDARY,
-      name: 'MVP规划',
-      icon: '📋',
-      status: TabStatus.LOCKED,
-    },
-    {
-      id: 5,
-      stage: Stage.DIAGRAM_DESIGN,
-      name: '架构设计',
-      icon: '🏗️',
-      status: TabStatus.LOCKED,
-    },
-    {
-      id: 6,
-      stage: Stage.DOCUMENT_GENERATION,
-      name: '生成文档',
-      icon: '📄',
-      status: TabStatus.LOCKED,
-    },
-  ]);
+  const [tabs, setTabs] = useState<TabConfig[]>([...INITIAL_TABS]);
 
   const [stageData, setStageData] = useState<StageData>({
     requirement: {},
@@ -101,6 +66,9 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * 执行实际的保存操作
+   *
+   * @param currentStageValue - 当前阶段
+   * @param stageDataValue - 阶段数据
    */
   const performSave = useCallback(async (currentStageValue: Stage, stageDataValue: StageData): Promise<void> => {
     if (!sessionId || isSavingRef.current) return;
@@ -113,6 +81,11 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
 
     isSavingRef.current = true;
     setSaveStatus('saving');
+
+    // 清除之前的定时器
+    if (saveStatusResetTimerRef.current) {
+      clearTimeout(saveStatusResetTimerRef.current);
+    }
 
     try {
       const session: SessionRecord = {
@@ -137,19 +110,17 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
       setLastSavedAt(Date.now());
       setSaveStatus('saved');
 
-      // 2秒后重置状态为 idle
-      setTimeout(() => {
-        if (saveStatus === 'saved') {
-          setSaveStatus('idle');
-        }
-      }, 2000);
+      // 使用配置的延迟时间重置状态为 idle
+      saveStatusResetTimerRef.current = setTimeout(() => {
+        setSaveStatus('idle');
+      }, SAVE_STATUS_RESET_MS);
     } catch (error) {
       console.error('Failed to save session:', error);
       setSaveStatus('error');
     } finally {
       isSavingRef.current = false;
     }
-  }, [sessionId, saveStatus]);
+  }, [sessionId]);
 
   /**
    * 防抖保存：延迟执行保存操作
@@ -187,22 +158,29 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     }
 
     return () => {
+      // 清理所有定时器
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current);
+      }
+      if (saveStatusResetTimerRef.current) {
+        clearTimeout(saveStatusResetTimerRef.current);
       }
     };
   }, [sessionId, stageData, currentStage, scheduleSave]);
 
   const setCurrentStage = useCallback((stage: Stage) => {
-    setCurrentStageState(stage);
+    // React 19: 使用 startTransition 包裹非紧急更新
+    startTransition(() => {
+      setCurrentStageState(stage);
 
-    // 更新tab状态：将目标tab设置为ACTIVE
-    setTabs((prev) =>
-      prev.map((tab) => ({
-        ...tab,
-        status: tab.stage === stage ? TabStatus.ACTIVE : tab.status,
-      }))
-    );
+      // 更新tab状态：将目标tab设置为ACTIVE
+      setTabs((prev) =>
+        prev.map((tab) => ({
+          ...tab,
+          status: tab.stage === stage ? TabStatus.ACTIVE : tab.status,
+        }))
+      );
+    });
   }, []);
 
   const updateTabStatus = useCallback((stage: Stage, status: TabStatus) => {
@@ -217,16 +195,21 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
 
   const completeStage = useCallback(
     (stage: Stage) => {
-      // 标记当前stage为完成
-      updateTabStatus(stage, TabStatus.COMPLETED);
+      // React 19: 使用 startTransition 包裹非紧急更新
+      startTransition(() => {
+        // 标记当前stage为完成
+        updateTabStatus(stage, TabStatus.COMPLETED);
 
-      // 解锁并激活下一个stage
-      const currentTabIndex = tabs.findIndex((tab) => tab.stage === stage);
-      if (currentTabIndex < tabs.length - 1) {
-        const nextStage = tabs[currentTabIndex + 1].stage;
-        updateTabStatus(nextStage, TabStatus.ACTIVE);
-        setCurrentStage(nextStage);
-      }
+        // 解锁并激活下一个stage
+        const currentTabIndex = tabs.findIndex((tab) => tab.stage === stage);
+        if (currentTabIndex >= 0 && currentTabIndex < tabs.length - 1) {
+          const nextTab = tabs[currentTabIndex + 1];
+          if (nextTab) {
+            updateTabStatus(nextTab.stage, TabStatus.ACTIVE);
+            setCurrentStage(nextTab.stage);
+          }
+        }
+      });
     },
     [tabs, updateTabStatus, setCurrentStage]
   );
@@ -236,17 +219,20 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
       const targetTab = tabs.find((tab) => tab.stage === stage);
       // 只允许跳转到已完成或当前激活的tab
       if (targetTab && (targetTab.status === TabStatus.COMPLETED || targetTab.status === TabStatus.ACTIVE)) {
-        // 将之前的ACTIVE tab设为COMPLETED
-        setTabs((prev) =>
-          prev.map((tab) => ({
-            ...tab,
-            status:
-              tab.status === TabStatus.ACTIVE && tab.stage !== stage
-                ? TabStatus.COMPLETED
-                : tab.status,
-          }))
-        );
-        setCurrentStage(stage);
+        // React 19: 使用 startTransition 包裹非紧急更新
+        startTransition(() => {
+          // 将之前的ACTIVE tab设为COMPLETED
+          setTabs((prev) =>
+            prev.map((tab) => ({
+              ...tab,
+              status:
+                tab.status === TabStatus.ACTIVE && tab.stage !== stage
+                  ? TabStatus.COMPLETED
+                  : tab.status,
+            }))
+          );
+          setCurrentStage(stage);
+        });
       }
     },
     [tabs, setCurrentStage]
@@ -257,50 +243,7 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     setCurrentStageState(Stage.REQUIREMENT_COLLECTION);
     setSessionId(null);
     setStageData({ requirement: {} });
-    setTabs([
-      {
-        id: 1,
-        stage: Stage.REQUIREMENT_COLLECTION,
-        name: '需求采集',
-        icon: '📝',
-        status: TabStatus.ACTIVE,
-      },
-      {
-        id: 2,
-        stage: Stage.RISK_ANALYSIS,
-        name: '风险评估',
-        icon: '⚠️',
-        status: TabStatus.LOCKED,
-      },
-      {
-        id: 3,
-        stage: Stage.TECH_STACK,
-        name: '技术选型',
-        icon: '🔧',
-        status: TabStatus.LOCKED,
-      },
-      {
-        id: 4,
-        stage: Stage.MVP_BOUNDARY,
-        name: 'MVP规划',
-        icon: '📋',
-        status: TabStatus.LOCKED,
-      },
-      {
-        id: 5,
-        stage: Stage.DIAGRAM_DESIGN,
-        name: '架构设计',
-        icon: '🏗️',
-        status: TabStatus.LOCKED,
-      },
-      {
-        id: 6,
-        stage: Stage.DOCUMENT_GENERATION,
-        name: '生成文档',
-        icon: '📄',
-        status: TabStatus.LOCKED,
-      },
-    ]);
+    setTabs([...INITIAL_TABS]);
   }, []);
 
   const value: StageContextValue = {
@@ -318,6 +261,7 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     lastSavedAt,
     manualSave,
     resetAll,
+    isTransitionPending,
   };
 
   return <StageContext.Provider value={value}>{children}</StageContext.Provider>;

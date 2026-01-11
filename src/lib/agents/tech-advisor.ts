@@ -91,8 +91,9 @@ ${JSON.stringify(state.summary[Stage.RISK_ANALYSIS], null, 2)}
       currentStage: Stage.TECH_STACK,
       needMoreInfo: true,
     };
-  } catch (error: any) {
-    logger.error('TechAdvisor node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('TechAdvisor node failed', { sessionId: state.sessionId, error: errorMessage });
     return {
       response: '建议使用Next.js + Supabase快速搭建MVP。',
       currentStage: Stage.MVP_BOUNDARY,

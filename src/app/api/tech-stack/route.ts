@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callLLMWithJSON } from '@/lib/llm/helper';
 import promptManager, { PromptType } from '@/lib/prompts';
 import logger from '@/lib/logger';
-import { RequirementProfile } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TechStackResult {
@@ -112,14 +111,16 @@ ${userPreferences ? '请优先使用用户熟悉的技术栈，但也要确保�
       category: result.category,
       options,
     });
-  } catch (error: any) {
-    logger.error('Tech stack API error', { error: error.message, stack: error.stack });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error('Tech stack API error', { error: errorMessage, stack: errorStack });
 
     return NextResponse.json(
       {
         error: true,
         message: '技术栈推荐失败，请稍后重试',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       },
       { status: 500 }
     );

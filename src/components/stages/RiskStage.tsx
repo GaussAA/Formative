@@ -72,10 +72,15 @@ export function RiskStage() {
       return;
     }
 
+    if (!stageData.riskAnalysis) {
+      alert('风险分析数据尚未准备好');
+      return;
+    }
+
     // 更新全局状态
     updateStageData({
       riskAnalysis: {
-        ...stageData.riskAnalysis!,
+        ...stageData.riskAnalysis,
         selectedApproach,
       },
     });

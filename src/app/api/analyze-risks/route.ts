@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callLLMWithJSON } from '@/lib/llm/helper';
 import promptManager, { PromptType } from '@/lib/prompts';
 import logger from '@/lib/logger';
-import { RiskSeverity, RequirementProfile } from '@/types';
+import { RiskSeverity } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface RiskAnalysisResult {
@@ -106,14 +106,16 @@ ${JSON.stringify(profile, null, 2)}
       risks,
       approaches,
     });
-  } catch (error: any) {
-    logger.error('Analyze risks API error', { error: error.message, stack: error.stack });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error('Analyze risks API error', { error: errorMessage, stack: errorStack });
 
     return NextResponse.json(
       {
         error: true,
         message: '风险分析失败，请稍后重试',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       },
       { status: 500 }
     );

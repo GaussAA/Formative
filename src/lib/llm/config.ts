@@ -91,11 +91,13 @@ export const LLM_CONFIGS: Record<string, LLMConfig> = {
  * 获取指定 Agent 的 LLM 配置
  */
 export function getLLMConfig(agentType: string): LLMConfig {
-  return LLM_CONFIGS[agentType] || {
-    temperature: 0.3,
-    maxTokens: 1500,
-    description: '默认配置',
-  };
+  return (
+    LLM_CONFIGS[agentType] || {
+      temperature: 0.3,
+      maxTokens: 1500,
+      description: '默认配置',
+    }
+  );
 }
 
 /**

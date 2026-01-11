@@ -206,8 +206,9 @@ ${JSON.stringify(state.profile, null, 2)}
       needMoreInfo,
       currentStage: nextStage,
     };
-  } catch (error: any) {
-    logger.error('Planner node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Planner node failed', { sessionId: state.sessionId, error: errorMessage });
     return {
       completeness: strictCompleteness,
       missingFields,

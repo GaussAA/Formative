@@ -63,10 +63,15 @@ export function MVPStage() {
   };
 
   const handleConfirm = () => {
+    if (!devPlan) {
+      alert('开发计划尚未生成，请稍后重试');
+      return;
+    }
+
     updateStageData({
       mvpBoundary: {
         features,
-        devPlan: devPlan!,
+        devPlan,
       },
     });
 

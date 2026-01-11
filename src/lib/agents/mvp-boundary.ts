@@ -84,8 +84,9 @@ ${result.recommendation}
       currentStage: Stage.MVP_BOUNDARY,
       needMoreInfo: false, // 直接进入下一阶段生成文档
     };
-  } catch (error: any) {
-    logger.error('MVPBoundary node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('MVPBoundary node failed', { sessionId: state.sessionId, error: errorMessage });
     return {
       response: 'MVP边界定义完成，准备生成开发方案。',
       currentStage: Stage.DOCUMENT_GENERATION,

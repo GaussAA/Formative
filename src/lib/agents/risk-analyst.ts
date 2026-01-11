@@ -77,8 +77,9 @@ ${JSON.stringify(state.profile, null, 2)}
       currentStage: Stage.RISK_ANALYSIS,
       needMoreInfo: true,
     };
-  } catch (error: any) {
-    logger.error('RiskAnalyst node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('RiskAnalyst node failed', { sessionId: state.sessionId, error: errorMessage });
     return {
       response: '风险分析完成，建议采用稳健的技术方案。',
       currentStage: Stage.TECH_STACK,

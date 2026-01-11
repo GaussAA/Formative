@@ -65,8 +65,9 @@ ${(state.askedQuestions || []).join('\n')}
       })),
       askedQuestions: [...askedQuestions, result.message],
     };
-  } catch (error: any) {
-    logger.error('Asker node failed', { sessionId: state.sessionId, error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Asker node failed', { sessionId: state.sessionId, error: errorMessage });
 
     // 降级：使用简单的默认问题
     const firstMissing = state.missingFields?.[0];

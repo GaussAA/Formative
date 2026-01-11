@@ -1,23 +1,37 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export function HeroPage() {
   const router = useRouter();
 
-  const handleStart = () => {
+  // 使用 useCallback 优化事件处理函数
+  const handleStart = useCallback(() => {
     router.push('/app');
-  };
+  }, [router]);
+
+  const handleHistory = useCallback(() => {
+    router.push('/history');
+  }, [router]);
+
+  // 使用 useCallback 优化按钮点击处理器
+  const handleLearnMore = useCallback(() => {
+    // 滚动到第一个内容区块
+    const firstSection = document.querySelector('.bg-white.rounded-3xl');
+    if (firstSection) {
+      firstSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-purple-50">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 bg-linear-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-white text-xl font-bold">F</span>
               </div>
               <div>
@@ -27,7 +41,7 @@ export function HeroPage() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => router.push('/history')}
+                onClick={handleHistory}
                 className="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-xl font-medium hover:bg-gray-100 transition-all"
               >
                 📋 历史记录
@@ -59,11 +73,14 @@ export function HeroPage() {
           <div className="mt-10 flex justify-center gap-4">
             <button
               onClick={handleStart}
-              className="px-8 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-2xl font-semibold text-lg hover:shadow-xl transition-all transform hover:scale-105"
+              className="px-8 py-4 bg-linear-to-r from-primary to-blue-600 text-white rounded-2xl font-semibold text-lg hover:shadow-xl transition-all transform hover:scale-105"
             >
               开始定型你的想法 →
             </button>
-            <button className="px-8 py-4 bg-white text-gray-700 rounded-2xl font-semibold text-lg border-2 border-gray-300 hover:border-primary hover:text-primary transition-all">
+            <button
+              onClick={handleLearnMore}
+              className="px-8 py-4 bg-white text-gray-700 rounded-2xl font-semibold text-lg border-2 border-gray-300 hover:border-primary hover:text-primary transition-all"
+            >
               了解更多
             </button>
           </div>
@@ -139,15 +156,15 @@ export function HeroPage() {
                   <p className="font-semibold text-gray-900 mb-4">在你让 AI 开始写第一行代码之前，定型会做三件关键的事：</p>
                   <div className="space-y-4">
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center flex-shrink-0 mr-3 font-bold">1</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">1</div>
                       <p>把一句白话需求，拆解成完整的工程问题</p>
                     </div>
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center flex-shrink-0 mr-3 font-bold">2</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">2</div>
                       <p>暴露潜在风险，并给出可选方案</p>
                     </div>
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center flex-shrink-0 mr-3 font-bold">3</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">3</div>
                       <p>帮你做出适合你的技术决策，而不是"看起来最酷的那种"</p>
                     </div>
                   </div>
@@ -193,7 +210,7 @@ export function HeroPage() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 my-6">
+                <div className="bg-linear-to-r from-green-50 to-blue-50 rounded-xl p-6 my-6">
                   <p className="font-semibold text-gray-900 mb-3">这意味着：</p>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-center">
@@ -221,7 +238,7 @@ export function HeroPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="mt-24 text-center bg-gradient-to-r from-primary to-blue-600 rounded-3xl p-12 text-white">
+        <div className="mt-24 text-center bg-linear-to-r from-primary to-blue-600 rounded-3xl p-12 text-white">
           <h2 className="text-4xl font-bold mb-4">准备好让你的想法定型了吗？</h2>
           <p className="text-xl text-blue-100 mb-8">5分钟，从一句话到完整方案</p>
           <button

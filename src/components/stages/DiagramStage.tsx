@@ -89,19 +89,19 @@ export function DiagramStage() {
 
       const data = await response.json();
 
-      if (editingType === 'architecture') {
+      if (editingType === 'architecture' && sequenceDiagram) {
         setArchitectureDiagram(data.diagram);
         updateStageData({
           diagrams: {
             architectureDiagram: data.diagram,
-            sequenceDiagram: sequenceDiagram!,
+            sequenceDiagram,
           },
         });
-      } else {
+      } else if (architectureDiagram) {
         setSequenceDiagram(data.diagram);
         updateStageData({
           diagrams: {
-            architectureDiagram: architectureDiagram!,
+            architectureDiagram,
             sequenceDiagram: data.diagram,
           },
         });

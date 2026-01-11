@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/shared/Card';
+import { Card, CardContent } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { Modal } from '@/components/shared/Modal';

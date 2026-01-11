@@ -37,7 +37,7 @@ ${JSON.stringify(requirement, null, 2)}
 
 ${techStack ? `选择的技术栈：\n${JSON.stringify(techStack, null, 2)}` : ''}
 
-${mvpFeatures ? `MVP 功能列表：\n${JSON.stringify(mvpFeatures.filter((f: any) => f.inMVP).map((f: any) => f.name), null, 2)}` : ''}
+${mvpFeatures ? `MVP 功能列表：\n${JSON.stringify(mvpFeatures.filter((f: { inMVP?: boolean }) => f.inMVP).map((f: { name?: string }) => f.name), null, 2)}` : ''}
 
 请生成系统架构图和核心流程时序图的 Mermaid 代码。
 
@@ -79,10 +79,11 @@ ${mvpFeatures ? `MVP 功能列表：\n${JSON.stringify(mvpFeatures.filter((f: an
     logger.info('Diagrams generated successfully');
 
     return NextResponse.json(response);
-  } catch (error: any) {
-    logger.error('Error in generate-diagrams API:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Error in generate-diagrams API:', { error: errorMessage });
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: errorMessage || 'Internal server error' },
       { status: 500 }
     );
   }
