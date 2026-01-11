@@ -58,17 +58,20 @@ pnpm ops
 ### 1. 启动脚本 (start.js)
 
 **功能**:
+
 - 检查端口占用
 - 验证环境变量
 - 启动 Next.js 开发服务器
 - 实时显示启动日志
 
 **用法**:
+
 ```bash
 pnpm ops:start
 ```
 
 **特性**:
+
 - ✅ 自动检测并终止占用端口的进程
 - ✅ 验证 `.env.local` 配置
 - ✅ 显示启动进度和访问地址
@@ -76,6 +79,7 @@ pnpm ops:start
 - ✅ 支持 Ctrl+C 平滑关闭
 
 **输出示例**:
+
 ```
 [22:30:01] ✅ 端口 3000 可用
 [22:30:01] ✅ 环境变量检查通过
@@ -89,11 +93,13 @@ pnpm ops:start
 ### 2. 关闭脚本 (stop.js)
 
 **功能**:
+
 - 查找并终止 Next.js 进程
 - 释放端口
 - 可选清理缓存
 
 **用法**:
+
 ```bash
 # 基本用法
 pnpm ops:stop
@@ -106,11 +112,13 @@ pnpm ops:stop --force
 ```
 
 **选项**:
+
 - `--clean, -c`: 清理缓存文件
 - `--cache`: 清理临时文件
 - `--force, -f`: 不确认直接终止
 
 **输出示例**:
+
 ```
 [22:31:01] 找到 1 个进程:
 [22:31:01]   PID: 12345 - next dev
@@ -120,17 +128,24 @@ pnpm ops:stop --force
 
 ---
 
-### 3. 清理脚本 (clean.js)
+### 3. 清理脚本 (clean.js) ⭐ 优化版
 
 **功能**:
-- 清理 Next.js 构建缓存
-- 删除临时文件和日志
-- 可选删除 node_modules
-- 可选重装依赖
+
+- ✅ 清理构建缓存 (`.next`, `.turbo`, `.swc`, `node_modules/.cache`)
+- ✅ 清理日志文件 (`logs/` 目录)
+- ✅ 清理测试报告 (`coverage/`, `playwright-report/`, `test-results/`)
+- ✅ 清理临时文件 (`.DS_Store`, `Thumbs.db`, `nul`, `*.log`)
+- ✅ 清理备份文件 (`.backup/`)
+- ✅ 清理 TypeScript 构建信息 (`tsconfig.tsbuildinfo`)
+- ✅ 清理临时文档
+- ✅ 删除 node_modules 并重装依赖
+- ✅ 显示磁盘使用情况
 
 **用法**:
+
 ```bash
-# 清理所有缓存
+# 清理所有缓存和临时文件
 pnpm ops:clean --all
 
 # 仅清理构建缓存
@@ -139,41 +154,65 @@ pnpm ops:clean --cache
 # 仅清理日志
 pnpm ops:clean --logs
 
+# 仅清理测试报告
+pnpm ops:clean --test
+
+# 仅清理临时文件
+pnpm ops:clean --temp
+
 # 删除 node_modules 并重装
 pnpm ops:clean --reinstall
 
 # 显示磁盘使用情况
 pnpm ops:clean --disk
+
+# 组合使用
+pnpm ops:clean --cache --logs --test
 ```
 
 **选项**:
+
 - `--all, -a`: 清理所有缓存和临时文件
 - `--cache, -c`: 仅清理构建缓存
 - `--logs, -l`: 仅清理日志文件
-- `--temp, -t`: 仅清理临时文件
+- `--test, -t`: 仅清理测试报告
+- `--temp`: 仅清理临时文件
+- `--backup`: 仅清理备份文件
+- `--ts`: 仅清理 TypeScript 构建信息
+- `--docs`: 仅清理临时文档
 - `--node-modules`: 删除 node_modules
 - `--reinstall`: 删除并重装依赖
 - `--npm`: 使用 npm 而非 pnpm
 - `--disk, -d`: 显示磁盘使用情况
+- `--help, -h`: 显示帮助信息
 
 **清理内容**:
-- `.next/` - Next.js 构建缓存
-- `node_modules/.cache/` - Node.js 模块缓存
-- `logs/` - 日志文件
-- `*.log` - 临时日志
-- `.DS_Store`, `Thumbs.db` - 系统文件
+
+| 类别         | 目录/文件                                            | 说明                   |
+| ------------ | ---------------------------------------------------- | ---------------------- |
+| **构建缓存** | `.next/`, `node_modules/.cache/`, `.turbo/`, `.swc/` | Next.js/Turbo/SWC 缓存 |
+| **测试报告** | `coverage/`, `playwright-report/`, `test-results/`   | 测试覆盖率和报告       |
+| **日志文件** | `logs/` 目录所有文件                                 | 运行日志               |
+| **备份文件** | `.backup/`                                           | 依赖备份               |
+| **临时文件** | `.DS_Store`, `Thumbs.db`, `nul`, `*.log`             | 系统临时文件           |
+| **TS 构建**  | `tsconfig.tsbuildinfo`                               | TypeScript 构建信息    |
+| **临时文档** | `LOGGING_IMPLEMENTATION_COMPLETE.md`                 | 临时文档               |
+
+**详见**: [CLEAN_USAGE.md](CLEAN_USAGE.md)
 
 ---
 
 ### 4. 重装脚本 (reinstall.js)
 
 **功能**:
+
 - 备份当前依赖状态
 - 删除 node_modules 和 lock 文件
 - 重新安装依赖
 - 验证安装结果
 
 **用法**:
+
 ```bash
 # 自动检测包管理器并重装
 pnpm ops:reinstall
@@ -192,6 +231,7 @@ pnpm ops:reinstall --force
 ```
 
 **选项**:
+
 - `--manager <name>`: 指定包管理器 (pnpm|npm|yarn)
 - `--no-backup`: 跳过备份
 - `--verify`: 安装后验证
@@ -201,6 +241,7 @@ pnpm ops:reinstall --force
 **备份位置**: `.backup/backup-YYYY-MM-DD-HH-MM-SS/`
 
 **输出示例**:
+
 ```
 [22:32:01] ✅ 检测到 pnpm
 [22:32:01] 备份当前依赖状态...
@@ -221,6 +262,7 @@ pnpm ops:reinstall --force
 ### 5. 健康检查脚本 (health.js)
 
 **功能**:
+
 - 检查端口和进程状态
 - 验证环境变量配置
 - 检查依赖完整性
@@ -228,6 +270,7 @@ pnpm ops:reinstall --force
 - 生成健康报告
 
 **用法**:
+
 ```bash
 # 标准检查
 pnpm ops:health
@@ -243,11 +286,13 @@ pnpm ops:health --json
 ```
 
 **选项**:
+
 - `--full, -f`: 执行完整检查（包括 API 测试）
 - `--quick, -q`: 快速检查（跳过 API 测试）
 - `--json`: 输出 JSON 格式报告
 
 **检查项目**:
+
 - ✅ 端口占用状态
 - ✅ 进程运行状态
 - ✅ 环境变量配置
@@ -256,6 +301,7 @@ pnpm ops:health --json
 - ✅ API 端点可用性
 
 **输出示例**:
+
 ```
 [22:33:01] 检查端口状态...
 [22:33:01] ✅ 端口 3000 已被占用 (服务可能正在运行)
@@ -279,11 +325,13 @@ pnpm ops:health --json
 ### 6. 主入口脚本 (index.js)
 
 **功能**:
+
 - 统一入口管理所有脚本
 - 交互式菜单
 - 系统信息展示
 
 **用法**:
+
 ```bash
 # 显示帮助
 pnpm ops --help
@@ -303,6 +351,7 @@ pnpm ops status
 ```
 
 **交互菜单**:
+
 ```
 ╔════════════════════════════════════════════════════════════╗
 ║         Formative 运维菜单 - 请选择操作                    ║
@@ -450,6 +499,7 @@ pnpm ops:stop && pnpm ops:clean --all && pnpm ops:reinstall --verify && pnpm ops
 - `logs/app.log` - 应用运行日志（如果配置）
 
 查看日志：
+
 ```bash
 # Linux/Mac
 tail -f logs/startup.log
@@ -459,6 +509,7 @@ type logs\startup.log
 ```
 
 清理日志：
+
 ```bash
 pnpm ops:clean --logs
 ```
@@ -538,6 +589,7 @@ cp .env.example .env.local
 ## 📞 支持
 
 如有问题，请查看：
+
 1. 脚本内置帮助: `node scripts/ops/index.js --help`
 2. 项目文档
 3. GitHub Issues

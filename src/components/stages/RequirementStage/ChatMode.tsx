@@ -16,6 +16,7 @@ export function ChatMode({
   loading,
   sendMessage,
   messagesEndRef,
+  streamingContent = '', // React 19: 流式响应内容
 }: ChatModeProps) {
   const handleSubmit = useCallback(
     (e: FormEvent) => {
@@ -76,14 +77,23 @@ export function ChatMode({
           {loading && (
             <div className="flex justify-start">
               <div className="bg-white border border-gray-200 px-5 py-3.5 rounded-2xl shadow-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                {streamingContent ? (
+                  // React 19: 显示流式响应内容
+                  <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
+                    {streamingContent}
+                    <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse" />
+                  </p>
+                ) : (
+                  // 初始加载状态
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                    <span className="text-gray-500 text-sm">正在思考...</span>
                   </div>
-                  <span className="text-gray-500 text-sm">正在思考...</span>
-                </div>
+                )}
               </div>
             </div>
           )}

@@ -9,6 +9,8 @@ import { getLLMConfig } from './config';
 import { env, getLLMBaseURL } from '@/config/env';
 import type { ChatOpenAIConfig, LLMCreateConfig, ConversationMessage } from './types';
 import { buildMessages } from './messageBuilder';
+import { llmCache, hashString } from '../cache/lru-cache';
+import { retryWithTimeout } from '../utils/retry';
 
 /**
  * 创建 LLM 实例（兼容 OpenAI API 的提供商）
@@ -39,9 +41,7 @@ export function createLLM(config?: LLMCreateConfig) {
   });
 
   // Ollama 不需要 API Key，使用占位符
-  const effectiveApiKey = provider === 'ollama'
-    ? (apiKey || 'ollama')
-    : apiKey;
+  const effectiveApiKey = provider === 'ollama' ? apiKey || 'ollama' : apiKey;
 
   const llmParams: ChatOpenAIConfig = {
     model: model,
@@ -86,9 +86,31 @@ export async function callLLMWithJSON<T = unknown>(
     logger.debug('LLM response received', { length: content.length });
 
     // 尝试解析JSON
-    // 去除可能的markdown代码块标记
-    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
-    const jsonStr = jsonMatch?.[1] || content;
+    // 1. 先尝试从 markdown 代码块中提取
+    let jsonStr = content;
+    const jsonMatch =
+      content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+    if (jsonMatch?.[1]) {
+      jsonStr = jsonMatch[1];
+    } else {
+      // 2. 如果没有代码块，尝试提取 JSON 对象 (处理 LLM 在 JSON 前后添加文本的情况)
+      // 查找第一个 { 和最后一个 }
+      const firstBrace = content.indexOf('{');
+      const lastBrace = content.lastIndexOf('}');
+
+      // 同样处理数组情况
+      const firstBracket = content.indexOf('[');
+      const lastBracket = content.lastIndexOf(']');
+
+      // 确定是对象还是数组
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        // 对象类型
+        jsonStr = content.substring(firstBrace, lastBrace + 1);
+      } else if (firstBracket !== -1 && lastBracket !== -1) {
+        // 数组类型
+        jsonStr = content.substring(firstBracket, lastBracket + 1);
+      }
+    }
 
     try {
       return JSON.parse(jsonStr.trim()) as T;
@@ -153,33 +175,88 @@ export async function callLLMWithJSONByAgent<T = unknown>(
   userMessage: string,
   conversationHistory?: ConversationMessage[]
 ): Promise<T> {
-  const llm = createLLM({ agentType });
+  // 生成缓存键（基于 agentType、systemPrompt 和 userMessage）
+  const cacheKey = hashString(
+    JSON.stringify({
+      agentType,
+      systemPrompt: systemPrompt.slice(0, 500), // 限制长度避免键过长
+      userMessage,
+    })
+  );
 
-  // 使用消息构建工具
-  const messages = buildMessages(systemPrompt, userMessage, conversationHistory);
+  // 检查缓存
+  const cached = llmCache.getAs<T>(cacheKey);
+  if (cached !== undefined) {
+    logger.info('LLM cache hit', { agentType, cacheStats: llmCache.getStats() });
+    return cached;
+  }
 
+  // 使用重试和超时机制调用 LLM
   try {
-    const response = await llm.invoke(messages);
-    const content = response.content.toString();
+    const result = await retryWithTimeout(
+      async () => {
+        const llm = createLLM({ agentType });
+        const messages = buildMessages(systemPrompt, userMessage, conversationHistory);
+        const response = await llm.invoke(messages);
+        const content = response.content.toString();
 
-    logger.debug('LLM response received', { agentType, length: content.length });
+        logger.debug('LLM response received', { agentType, length: content.length });
 
-    // 尝试解析JSON
-    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
-    const jsonStr = jsonMatch?.[1] || content;
+        // 尝试解析JSON
+        // 1. 先尝试从 markdown 代码块中提取
+        let jsonStr = content;
+        const jsonMatch =
+          content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
+        if (jsonMatch?.[1]) {
+          jsonStr = jsonMatch[1];
+        } else {
+          // 2. 如果没有代码块，尝试提取 JSON 对象 (处理 LLM 在 JSON 前后添加文本的情况)
+          // 查找第一个 { 和最后一个 }
+          const firstBrace = content.indexOf('{');
+          const lastBrace = content.lastIndexOf('}');
 
-    try {
-      return JSON.parse(jsonStr.trim()) as T;
-    } catch (parseError) {
-      logger.warn('Failed to parse JSON from LLM response', {
-        agentType,
-        content: content.substring(0, 200),
-      });
-      throw new Error(`Failed to parse JSON: ${parseError}`);
-    }
+          // 同样处理数组情况
+          const firstBracket = content.indexOf('[');
+          const lastBracket = content.lastIndexOf(']');
+
+          // 确定是对象还是数组
+          if (firstBrace !== -1 && lastBrace !== -1) {
+            // 对象类型
+            jsonStr = content.substring(firstBrace, lastBrace + 1);
+          } else if (firstBracket !== -1 && lastBracket !== -1) {
+            // 数组类型
+            jsonStr = content.substring(firstBracket, lastBracket + 1);
+          }
+        }
+
+        try {
+          return JSON.parse(jsonStr.trim()) as T;
+        } catch (parseError) {
+          logger.warn('Failed to parse JSON from LLM response', {
+            agentType,
+            content: content.substring(0, 200),
+          });
+          throw new Error(`Failed to parse JSON: ${parseError}`);
+        }
+      },
+      {
+        maxRetries: 3,
+        initialDelay: 1000,
+        onRetry: (attempt, error) => {
+          logger.warn(`LLM call retry attempt ${attempt}`, { agentType, error: error.message });
+        },
+      },
+      30000 // 30 秒超时
+    );
+
+    // 存入缓存
+    llmCache.set(cacheKey, result);
+    logger.debug('LLM response cached', { agentType, cacheStats: llmCache.getStats() });
+
+    return result;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('LLM call failed', { agentType, error: errorMessage });
+    logger.error('LLM call failed after retries', { agentType, error: errorMessage });
     throw error;
   }
 }

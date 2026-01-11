@@ -19,6 +19,7 @@ export interface ChatModeProps {
   loading: boolean;
   sendMessage: (text: string) => Promise<void>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  streamingContent?: string; // React 19: 流式响应内容
 }
 
 export interface FormModeProps {

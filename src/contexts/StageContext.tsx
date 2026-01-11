@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useTransition } from 'react';
 import { Stage, TabStatus, TabConfig, StageData } from '@/types';
 import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
 import { generateProjectName } from '@/lib/projectNameGenerator';
@@ -34,11 +34,17 @@ interface StageContextValue {
 
   // 重置功能
   resetAll: () => void;
+
+  // React 19 transition state
+  isTransitionPending: boolean;
 }
 
 const StageContext = createContext<StageContextValue | undefined>(undefined);
 
 export function StageProvider({ children }: { children: React.ReactNode }) {
+  // React 19: useTransition for non-urgent state updates
+  const [isTransitionPending, startTransition] = useTransition();
+
   const [currentStage, setCurrentStageState] = useState<Stage>(Stage.REQUIREMENT_COLLECTION);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -163,15 +169,18 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
   }, [sessionId, stageData, currentStage, scheduleSave]);
 
   const setCurrentStage = useCallback((stage: Stage) => {
-    setCurrentStageState(stage);
+    // React 19: 使用 startTransition 包裹非紧急更新
+    startTransition(() => {
+      setCurrentStageState(stage);
 
-    // 更新tab状态：将目标tab设置为ACTIVE
-    setTabs((prev) =>
-      prev.map((tab) => ({
-        ...tab,
-        status: tab.stage === stage ? TabStatus.ACTIVE : tab.status,
-      }))
-    );
+      // 更新tab状态：将目标tab设置为ACTIVE
+      setTabs((prev) =>
+        prev.map((tab) => ({
+          ...tab,
+          status: tab.stage === stage ? TabStatus.ACTIVE : tab.status,
+        }))
+      );
+    });
   }, []);
 
   const updateTabStatus = useCallback((stage: Stage, status: TabStatus) => {
@@ -186,18 +195,21 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
 
   const completeStage = useCallback(
     (stage: Stage) => {
-      // 标记当前stage为完成
-      updateTabStatus(stage, TabStatus.COMPLETED);
+      // React 19: 使用 startTransition 包裹非紧急更新
+      startTransition(() => {
+        // 标记当前stage为完成
+        updateTabStatus(stage, TabStatus.COMPLETED);
 
-      // 解锁并激活下一个stage
-      const currentTabIndex = tabs.findIndex((tab) => tab.stage === stage);
-      if (currentTabIndex >= 0 && currentTabIndex < tabs.length - 1) {
-        const nextTab = tabs[currentTabIndex + 1];
-        if (nextTab) {
-          updateTabStatus(nextTab.stage, TabStatus.ACTIVE);
-          setCurrentStage(nextTab.stage);
+        // 解锁并激活下一个stage
+        const currentTabIndex = tabs.findIndex((tab) => tab.stage === stage);
+        if (currentTabIndex >= 0 && currentTabIndex < tabs.length - 1) {
+          const nextTab = tabs[currentTabIndex + 1];
+          if (nextTab) {
+            updateTabStatus(nextTab.stage, TabStatus.ACTIVE);
+            setCurrentStage(nextTab.stage);
+          }
         }
-      }
+      });
     },
     [tabs, updateTabStatus, setCurrentStage]
   );
@@ -207,17 +219,20 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
       const targetTab = tabs.find((tab) => tab.stage === stage);
       // 只允许跳转到已完成或当前激活的tab
       if (targetTab && (targetTab.status === TabStatus.COMPLETED || targetTab.status === TabStatus.ACTIVE)) {
-        // 将之前的ACTIVE tab设为COMPLETED
-        setTabs((prev) =>
-          prev.map((tab) => ({
-            ...tab,
-            status:
-              tab.status === TabStatus.ACTIVE && tab.stage !== stage
-                ? TabStatus.COMPLETED
-                : tab.status,
-          }))
-        );
-        setCurrentStage(stage);
+        // React 19: 使用 startTransition 包裹非紧急更新
+        startTransition(() => {
+          // 将之前的ACTIVE tab设为COMPLETED
+          setTabs((prev) =>
+            prev.map((tab) => ({
+              ...tab,
+              status:
+                tab.status === TabStatus.ACTIVE && tab.stage !== stage
+                  ? TabStatus.COMPLETED
+                  : tab.status,
+            }))
+          );
+          setCurrentStage(stage);
+        });
       }
     },
     [tabs, setCurrentStage]
@@ -246,6 +261,7 @@ export function StageProvider({ children }: { children: React.ReactNode }) {
     lastSavedAt,
     manualSave,
     resetAll,
+    isTransitionPending,
   };
 
   return <StageContext.Provider value={value}>{children}</StageContext.Provider>;

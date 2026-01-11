@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useDeferredValue } from 'react';
 import { TechStackOption, Stage } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../shared/Card';
 import { Badge } from '../shared/Badge';
@@ -17,7 +17,7 @@ const TECH_OPTIONS = {
 };
 
 export function TechStackStage() {
-  const { stageData, updateStageData, completeStage, sessionId } = useStage();
+  const { stageData, updateStageData, completeStage, sessionId, isTransitionPending } = useStage();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<TechStackOption[]>([]);
   const [selected, setSelected] = useState<TechStackOption | null>(null);
@@ -28,6 +28,13 @@ export function TechStackStage() {
   const [selectedFrontend, setSelectedFrontend] = useState<string[]>([]);
   const [selectedBackend, setSelectedBackend] = useState<string[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string[]>([]);
+
+  // React 19: 使用 useDeferredValue 优化列表渲染
+  // 当用户快速点击选择技术时，使用延迟值保持 UI 响应
+  const deferredOptions = useDeferredValue(options);
+  const deferredSelectedFrontend = useDeferredValue(selectedFrontend);
+  const deferredSelectedBackend = useDeferredValue(selectedBackend);
+  const deferredSelectedDatabase = useDeferredValue(selectedDatabase);
 
   useEffect(() => {
     if (stageData.techStack) {
@@ -142,8 +149,11 @@ export function TechStackStage() {
     return <SkeletonLoader stage="tech" />;
   }
 
+  // React 19: 应用过渡状态样式，提供视觉反馈
+  const containerOpacity = isTransitionPending ? 0.7 : 1;
+
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className="h-full overflow-y-auto p-6" style={{ opacity: containerOpacity }}>
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">技术栈推荐</h1>
@@ -151,7 +161,8 @@ export function TechStackStage() {
         </div>
 
         <div className="space-y-4">
-          {options.map((option) => (
+          {/* React 19: 使用延迟值渲染列表，保持输入响应 */}
+          {deferredOptions.map((option) => (
             <Card
               key={option.id}
               className={`cursor-pointer transition-all ${
@@ -278,8 +289,9 @@ export function TechStackStage() {
                     <button
                       key={tech}
                       onClick={() => toggleTechSelection('frontend', tech)}
+                      /* React 19: 使用延迟值判断选中状态，保持输入响应 */
                       className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        selectedFrontend.includes(tech)
+                        deferredSelectedFrontend.includes(tech)
                           ? 'border-primary bg-blue-50 text-primary font-medium'
                           : 'border-gray-300 text-gray-700 hover:border-gray-400'
                       }`}
@@ -298,8 +310,9 @@ export function TechStackStage() {
                     <button
                       key={tech}
                       onClick={() => toggleTechSelection('backend', tech)}
+                      /* React 19: 使用延迟值判断选中状态，保持输入响应 */
                       className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        selectedBackend.includes(tech)
+                        deferredSelectedBackend.includes(tech)
                           ? 'border-primary bg-blue-50 text-primary font-medium'
                           : 'border-gray-300 text-gray-700 hover:border-gray-400'
                       }`}
@@ -318,8 +331,9 @@ export function TechStackStage() {
                     <button
                       key={tech}
                       onClick={() => toggleTechSelection('database', tech)}
+                      /* React 19: 使用延迟值判断选中状态，保持输入响应 */
                       className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        selectedDatabase.includes(tech)
+                        deferredSelectedDatabase.includes(tech)
                           ? 'border-primary bg-blue-50 text-primary font-medium'
                           : 'border-gray-300 text-gray-700 hover:border-gray-400'
                       }`}

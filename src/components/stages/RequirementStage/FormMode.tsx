@@ -1,24 +1,62 @@
 /**
  * 表单模式组件
  * 提供结构化的表单输入界面
+ * React 19: 使用 Server Actions + useActionState
  */
 
 'use client';
 
-import React from 'react';
-import type { FormModeProps } from './types';
+import React, { useActionState, useState, useTransition } from 'react';
 import { Button } from '../../shared/Button';
+import { submitRequirementForm, type RequirementFormState } from '@/app/actions/requirement-actions';
+
+interface FormModeWithServerActionsProps {
+  onFormSuccess?: (data: RequirementFormState) => void;
+  onFormError?: (data: RequirementFormState) => void;
+  switchToChatMode?: () => void;
+}
 
 export function FormMode({
-  formData,
-  setFormData,
-  coreFunctionInput,
-  setCoreFunctionInput,
-  loading,
-  handleFormSubmit,
-  handleAddCoreFunction,
-  handleRemoveCoreFunction,
-}: FormModeProps) {
+  onFormSuccess,
+  onFormError,
+  switchToChatMode,
+}: FormModeWithServerActionsProps) {
+  // React 19: useActionState 管理表单状态
+  const [state, formAction, isPending] = useActionState(submitRequirementForm, null);
+  const [isTransitionPending, startTransition] = useTransition();
+
+  // 本地表单状态（用于 UI 交互）
+  const [coreFunctions, setCoreFunctions] = useState<string[]>([]);
+  const [coreFunctionInput, setCoreFunctionInput] = useState('');
+
+  // 添加核心功能
+  const handleAddCoreFunction = () => {
+    if (coreFunctionInput.trim()) {
+      setCoreFunctions((prev) => [...prev, coreFunctionInput.trim()]);
+      setCoreFunctionInput('');
+    }
+  };
+
+  // 移除核心功能
+  const handleRemoveCoreFunction = (index: number) => {
+    setCoreFunctions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 监听 Server Action 返回状态
+  React.useEffect(() => {
+    if (state) {
+      if (state.success) {
+        startTransition(() => {
+          onFormSuccess?.(state);
+        });
+      } else if (state.errors || state.message) {
+        startTransition(() => {
+          onFormError?.(state);
+        });
+      }
+    }
+  }, [state]);
+
   return (
     <>
       <ModeSwitcher mode="form" setMode={() => {}} title="需求表单" />
@@ -28,7 +66,15 @@ export function FormMode({
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-2xl font-semibold mb-2">需求信息表单</h2>
             <p className="text-gray-600 mb-6">请填写完整的需求信息，我们将为您快速生成开发方案</p>
-            <form onSubmit={handleFormSubmit} className="space-y-6">
+
+            {/* 错误提示 */}
+            {state?.message && !state.success && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {state.message}
+              </div>
+            )}
+
+            <form action={formAction} className="space-y-6">
               {/* 项目名称 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -36,8 +82,7 @@ export function FormMode({
                 </label>
                 <input
                   type="text"
-                  value={formData.projectName || ''}
-                  onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
+                  name="projectName"
                   placeholder="例如：AI学习社区平台"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
@@ -49,13 +94,16 @@ export function FormMode({
                   产品目标 <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={formData.productGoal || ''}
-                  onChange={(e) => setFormData({ ...formData, productGoal: e.target.value })}
+                  name="productGoal"
                   placeholder="请简要描述您的产品要解决什么问题，实现什么目标"
                   rows={3}
                   required
+                  minLength={10}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
+                {state?.errors?.productGoal && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.productGoal[0]}</span>
+                )}
               </div>
 
               {/* 目标用户 - 必填 */}
@@ -65,12 +113,14 @@ export function FormMode({
                 </label>
                 <input
                   type="text"
-                  value={formData.targetUsers || ''}
-                  onChange={(e) => setFormData({ ...formData, targetUsers: e.target.value })}
+                  name="targetUsers"
                   placeholder="例如：AI技术爱好者、开发者"
                   required
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
+                {state?.errors?.targetUsers && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.targetUsers[0]}</span>
+                )}
               </div>
 
               {/* 使用场景 */}
@@ -79,8 +129,7 @@ export function FormMode({
                   使用场景（选填）
                 </label>
                 <textarea
-                  value={formData.useCases || ''}
-                  onChange={(e) => setFormData({ ...formData, useCases: e.target.value })}
+                  name="useCases"
                   placeholder="描述用户在什么情况下使用这个产品"
                   rows={2}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
@@ -92,12 +141,28 @@ export function FormMode({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   核心功能 <span className="text-red-500">*</span>
                 </label>
+
+                {/* 隐藏字段存储 coreFunctions */}
+                {coreFunctions.map((func, index) => (
+                  <input
+                    key={index}
+                    type="hidden"
+                    name="coreFunctions"
+                    value={func}
+                  />
+                ))}
+
                 <div className="flex gap-2 mb-3">
                   <input
                     type="text"
                     value={coreFunctionInput}
                     onChange={(e) => setCoreFunctionInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCoreFunction())}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCoreFunction();
+                      }
+                    }}
                     placeholder="输入一个核心功能，按回车添加"
                     className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                   />
@@ -110,7 +175,7 @@ export function FormMode({
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {formData.coreFunctions?.map((func, index) => (
+                  {coreFunctions.map((func, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-lg border border-gray-200"
@@ -128,8 +193,11 @@ export function FormMode({
                     </div>
                   ))}
                 </div>
-                {(!formData.coreFunctions || formData.coreFunctions.length === 0) && (
+                {coreFunctions.length === 0 && (
                   <p className="text-sm text-gray-500 mt-2">请至少添加一个核心功能</p>
+                )}
+                {state?.errors?.coreFunctions && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.coreFunctions[0]}</span>
                 )}
               </div>
 
@@ -143,8 +211,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsDataStorage"
-                      checked={formData.needsDataStorage === true}
-                      onChange={() => setFormData({ ...formData, needsDataStorage: true })}
+                      value="true"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -156,8 +224,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsDataStorage"
-                      checked={formData.needsDataStorage === false}
-                      onChange={() => setFormData({ ...formData, needsDataStorage: false })}
+                      value="false"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -166,6 +234,9 @@ export function FormMode({
                     </div>
                   </label>
                 </div>
+                {state?.errors?.needsDataStorage && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.needsDataStorage[0]}</span>
+                )}
               </div>
 
               {/* 多用户需求 - 必填 */}
@@ -178,8 +249,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsMultiUser"
-                      checked={formData.needsMultiUser === true}
-                      onChange={() => setFormData({ ...formData, needsMultiUser: true })}
+                      value="true"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -191,8 +262,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsMultiUser"
-                      checked={formData.needsMultiUser === false}
-                      onChange={() => setFormData({ ...formData, needsMultiUser: false })}
+                      value="false"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -201,6 +272,9 @@ export function FormMode({
                     </div>
                   </label>
                 </div>
+                {state?.errors?.needsMultiUser && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.needsMultiUser[0]}</span>
+                )}
               </div>
 
               {/* 用户登录需求 - 必填 */}
@@ -213,8 +287,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsAuth"
-                      checked={formData.needsAuth === true}
-                      onChange={() => setFormData({ ...formData, needsAuth: true })}
+                      value="true"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -226,8 +300,8 @@ export function FormMode({
                     <input
                       type="radio"
                       name="needsAuth"
-                      checked={formData.needsAuth === false}
-                      onChange={() => setFormData({ ...formData, needsAuth: false })}
+                      value="false"
+                      required
                       className="mr-3 w-4 h-4 text-primary"
                     />
                     <div>
@@ -236,12 +310,20 @@ export function FormMode({
                     </div>
                   </label>
                 </div>
+                {state?.errors?.needsAuth && (
+                  <span className="text-red-500 text-sm mt-1">{state.errors.needsAuth[0]}</span>
+                )}
               </div>
 
               {/* 提交按钮 */}
               <div className="pt-4">
-                <Button type="submit" disabled={loading} fullWidth loading={loading}>
-                  {loading ? '提交中...' : '提交需求'}
+                <Button
+                  type="submit"
+                  disabled={isPending || isTransitionPending || coreFunctions.length === 0}
+                  fullWidth
+                  loading={isPending || isTransitionPending}
+                >
+                  {isPending || isTransitionPending ? '提交中...' : '提交需求'}
                 </Button>
               </div>
             </form>

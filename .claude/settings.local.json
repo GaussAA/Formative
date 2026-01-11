@@ -40,7 +40,22 @@
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
       "Bash(netstat:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(chmod:*)",
+      "Bash(pnpm test:unit:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(pnpm test:coverage:*)",
+      "Bash(pnpm eslint:*)",
+      "Bash(pnpm vitest:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(bash scripts/verify-logger.sh:*)",
+      "Bash(if not exist:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(tail:*)",
+      "Bash(pnpm diagnostic:*)"
     ]
   }
 }

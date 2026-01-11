@@ -11,6 +11,17 @@ import { z } from 'zod';
 const LLMProviderSchema = z.enum(['deepseek', 'qwen', 'ollama', 'mimo']);
 
 /**
+ * 密钥源类型（P0 安全优化）
+ */
+const SecretSourceSchema = z.enum([
+  'env',
+  'vault',
+  'aws_secrets_manager',
+  'azure_key_vault',
+  'gcp_secret_manager',
+]);
+
+/**
  * 环境变量 Schema
  */
 const envSchema = z.object({
@@ -22,6 +33,34 @@ const envSchema = z.object({
 
   // Node 环境
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+
+  // P0: 密钥管理配置 (可选，用于生产环境)
+  SECRET_SOURCE: SecretSourceSchema.default('env'),
+
+  // HashiCorp Vault 配置
+  VAULT_ADDR: z.string().url().optional(),
+  VAULT_TOKEN: z.string().optional(),
+  VAULT_SECRET_PATH: z.string().default('secret'),
+
+  // AWS Secrets Manager 配置
+  AWS_REGION: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+
+  // Azure Key Vault 配置
+  AZURE_KEY_VAULT_URI: z.string().url().optional(),
+  AZURE_CLIENT_ID: z.string().optional(),
+  AZURE_CLIENT_SECRET: z.string().optional(),
+  AZURE_TENANT_ID: z.string().optional(),
+
+  // GCP Secret Manager 配置
+  GCP_PROJECT_ID: z.string().optional(),
+  GCP_CREDENTIALS: z.string().optional(),
+
+  // P0: 限流配置
+  RATE_LIMIT_ENABLED: z.coerce.boolean().default(true),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(30),
 });
 
 /**
@@ -33,8 +72,8 @@ function validateEnv() {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const missingVars = error.issues
-        .filter(issue => issue.path.length > 0)
-        .map(issue => `  - ${issue.path.join('.')}: ${issue.message}`)
+        .filter((issue) => issue.path.length > 0)
+        .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
         .join('\n');
 
       console.error('❌ 环境变量验证失败:\n' + missingVars);
@@ -76,7 +115,7 @@ export function getLLMBaseURL(): string {
     case 'ollama':
       return 'http://localhost:11434/v1';
     case 'mimo':
-      return 'https://api.mimo.com/v1';
+      return 'https://api.xiaomimimo.com/v1';
     default:
       return 'https://api.openai.com/v1';
   }

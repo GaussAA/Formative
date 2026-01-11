@@ -18,9 +18,7 @@ export function buildMessages(
   userMessage: string,
   conversationHistory?: ConversationMessage[]
 ): LLMMessage[] {
-  const messages: LLMMessage[] = [
-    { role: 'system', content: systemPrompt },
-  ];
+  const messages: LLMMessage[] = [{ role: 'system', content: systemPrompt }];
 
   // 添加对话历史
   if (conversationHistory && conversationHistory.length > 0) {

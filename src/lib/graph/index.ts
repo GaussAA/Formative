@@ -1,9 +1,14 @@
 /**
  * LangGraph Workflow
  * 使用StateGraph编排整个对话流程
+ *
+ * P1 Optimization: Integrated persistent checkpoint storage
+ * - Replaced MemorySaver with CheckpointFactory for state persistence
+ * - Added circuit breaker for fault tolerance
+ * - Added adaptive retry with error classification
  */
 
-import { StateGraph, END, MemorySaver } from '@langchain/langgraph';
+import { StateGraph, END } from '@langchain/langgraph';
 import { GraphState, GraphStateType } from './state';
 import { Stage } from '@/types';
 import { extractorNode } from '../agents/extractor';
@@ -14,22 +19,22 @@ import { techAdvisorNode } from '../agents/tech-advisor';
 import { mvpBoundaryNode } from '../agents/mvp-boundary';
 import { specGeneratorNode } from '../agents/spec-generator';
 import logger from '../logger';
+import { getCheckpointer } from '@/lib/storage/checkpoint-factory';
+import { getCircuitBreaker } from '@/lib/circuit-breaker/circuit-breaker';
+import { retryWithBackoffAdaptive } from '@/lib/utils/retry';
 
-// 全局单例 MemorySaver - 确保跨请求状态持久化
-let globalCheckpointer: MemorySaver | null = null;
-
-function getCheckpointer(): MemorySaver {
-  if (!globalCheckpointer) {
-    globalCheckpointer = new MemorySaver();
-    logger.info('MemorySaver singleton created');
-  }
-  return globalCheckpointer;
-}
+// P1: Get circuit breaker for workflow execution
+const workflowCircuitBreaker = getCircuitBreaker('workflow', {
+  threshold: 5,
+  timeout: 60000,
+  halfOpenAttempts: 2,
+});
 
 /**
  * 路由函数：决定下一个节点
+ * Exported for testing
  */
-function routeNext(state: GraphStateType): string {
+export function routeNext(state: GraphStateType): string {
   logger.info('🔀 ROUTING DECISION', {
     currentStage: state.currentStage,
     needMoreInfo: state.needMoreInfo,
@@ -121,8 +126,9 @@ function routeNext(state: GraphStateType): string {
 
 /**
  * 创建工作流图
+ * P1: Uses persistent checkpoint storage
  */
-export function createWorkflow() {
+export async function createWorkflow() {
   const workflow = new StateGraph(GraphState)
     // 添加节点
     .addNode('extractor', extractorNode)
@@ -157,131 +163,141 @@ export function createWorkflow() {
     // spec_generator -> END
     .addEdge('spec_generator', END);
 
-  // 编译图，使用全局单例checkpointer（确保状态持久化）
-  const checkpointer = getCheckpointer();
+  // 编译图，使用持久化checkpointer
+  const checkpointer = await getCheckpointer();
   const app = workflow.compile({ checkpointer });
 
-  logger.info('Workflow compiled successfully with singleton checkpointer');
+  logger.info('Workflow compiled successfully with persistent checkpointer');
 
   return app;
 }
 
 /**
  * 运行工作流
+ * P1: Integrated circuit breaker and adaptive retry
  */
 export async function runWorkflow(sessionId: string, userInput: string) {
-  const app = createWorkflow();
+  return workflowCircuitBreaker.execute(async () => {
+    return retryWithBackoffAdaptive(
+      async () => {
+        const app = await createWorkflow();
 
-  const initialState: Partial<GraphStateType> = {
-    sessionId,
-    userInput,
-    currentStage: Stage.REQUIREMENT_COLLECTION,
-    completeness: 0,
-    profile: {},
-    summary: {},
-    messages: [],
-    needMoreInfo: true,
-    missingFields: [],
-    askedQuestions: [], // 初始化已问问题列表
-    stop: false,
-    metadata: {
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  };
+        const initialState: Partial<GraphStateType> = {
+          sessionId,
+          userInput,
+          currentStage: Stage.REQUIREMENT_COLLECTION,
+          completeness: 0,
+          profile: {},
+          summary: {},
+          messages: [],
+          needMoreInfo: true,
+          missingFields: [],
+          askedQuestions: [], // 初始化已问问题列表
+          stop: false,
+          metadata: {
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        };
 
-  const config = {
-    configurable: {
-      thread_id: sessionId,
-    },
-  };
+        const config = {
+          configurable: {
+            thread_id: sessionId,
+          },
+        };
 
-  try {
-    logger.info('Running workflow', { sessionId, userInput });
+        logger.info('Running workflow', { sessionId, userInput });
 
-    // 运行工作流
-    const result = await app.invoke(initialState, config);
+        // 运行工作流
+        const result = await app.invoke(initialState, config);
 
-    logger.info('Workflow completed', {
-      sessionId,
-      currentStage: result.currentStage,
-      stop: result.stop,
-    });
+        logger.info('Workflow completed', {
+          sessionId,
+          currentStage: result.currentStage,
+          stop: result.stop,
+        });
 
-    return result;
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Workflow execution failed', {
-      sessionId,
-      error: errorMessage,
-    });
-    throw error;
-  }
+        return result;
+      },
+      {
+        maxRetries: 3,
+        adaptive: true,
+        onRetry: (attempt, error) => {
+          logger.warn('Workflow retry', { attempt, error: error.message });
+        },
+      }
+    );
+  });
 }
 
 /**
  * 继续已有会话的工作流
+ * P1: Integrated circuit breaker and adaptive retry
  */
 export async function continueWorkflow(sessionId: string, userInput: string) {
-  const app = createWorkflow();
+  return workflowCircuitBreaker.execute(async () => {
+    return retryWithBackoffAdaptive(
+      async () => {
+        const app = await createWorkflow();
 
-  const config = {
-    configurable: {
-      thread_id: sessionId,
-    },
-  };
+        const config = {
+          configurable: {
+            thread_id: sessionId,
+          },
+        };
 
-  try {
-    // 获取当前状态
-    const currentState = await app.getState(config);
+        // 获取当前状态
+        const currentState = await app.getState(config);
 
-    if (!currentState || !currentState.values) {
-      // 如果没有找到会话，创建新会话
-      logger.warn('Session not found, creating new session', { sessionId });
-      return runWorkflow(sessionId, userInput);
-    }
+        if (!currentState || !currentState.values) {
+          // 如果没有找到会话，创建新会话
+          logger.warn('Session not found, creating new session', { sessionId });
+          return runWorkflow(sessionId, userInput);
+        }
 
-    // 确保messages是数组
-    const existingMessages = Array.isArray(currentState.values.messages)
-      ? currentState.values.messages
-      : [];
+        // 确保messages是数组
+        const existingMessages = Array.isArray(currentState.values.messages)
+          ? currentState.values.messages
+          : [];
 
-    // 确保profile不为空
-    const existingProfile = currentState.values.profile || {};
+        // 确保profile不为空
+        const existingProfile = currentState.values.profile || {};
 
-    // 更新用户输入和消息历史
-    const updatedState: Partial<GraphStateType> = {
-      ...currentState.values,
-      userInput,
-      profile: existingProfile, // 确保profile存在
-      messages: [
-        ...existingMessages,
-        { role: 'user', content: userInput },
-      ],
-      metadata: {
-        ...currentState.values.metadata,
-        updatedAt: Date.now(),
+        // 更新用户输入和消息历史
+        const updatedState: Partial<GraphStateType> = {
+          ...currentState.values,
+          userInput,
+          profile: existingProfile, // 确保profile存在
+          messages: [
+            ...existingMessages,
+            { role: 'user', content: userInput },
+          ],
+          metadata: {
+            ...currentState.values.metadata,
+            updatedAt: Date.now(),
+          },
+        };
+
+        logger.info('Continuing workflow', { sessionId, userInput });
+
+        // 继续运行工作流
+        const result = await app.invoke(updatedState, config);
+
+        logger.info('Workflow continued', {
+          sessionId,
+          currentStage: result.currentStage,
+          stop: result.stop,
+        });
+
+        return result;
       },
-    };
-
-    logger.info('Continuing workflow', { sessionId, userInput });
-
-    // 继续运行工作流
-    const result = await app.invoke(updatedState, config);
-
-    logger.info('Workflow continued', {
-      sessionId,
-      currentStage: result.currentStage,
-      stop: result.stop,
-    });
-
-    return result;
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to continue workflow', {
-      sessionId,
-      error: errorMessage,
-    });
-    throw error;
-  }
+      {
+        maxRetries: 3,
+        adaptive: true,
+        onRetry: (attempt, error) => {
+          logger.warn('Continue workflow retry', { attempt, error: error.message });
+        },
+      }
+    );
+  });
 }

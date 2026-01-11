@@ -11,6 +11,9 @@ const eslintConfig = [
       'coverage/**',
       '*.config.js',
       '*.config.mjs',
+      'test-results/**',
+      'playwright-report/**',
+      'playwright/.cache/**',
     ],
   },
   {
@@ -59,6 +62,44 @@ const eslintConfig = [
       react: {
         version: 'detect',
       },
+    },
+  },
+  // Test files configuration with Vitest globals
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: './tsconfig.json',
+      },
+      globals: {
+        // Vitest globals
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+        // React Testing Library
+        JSX: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      // Allow console in tests
+      'no-console': 'off',
+      // Allow any in mocks
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];
