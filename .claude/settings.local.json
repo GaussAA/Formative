@@ -63,7 +63,8 @@
       "Bash(pnpm approve-builds:*)",
       "Bash(npx node-gyp rebuild:*)",
       "Bash(pnpm tsx:*)",
-      "Bash(pnpm db:seed:*)"
+      "Bash(pnpm db:seed:*)",
+      "Bash(grep:*)"
     ]
   }
 }

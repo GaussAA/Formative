@@ -284,3 +284,467 @@ export interface StageData {
   diagrams?: DiagramsData; // 图表数据，不参与文档生成的上下文
   finalSpec?: string;
 }
+
+// ============= Prompt Engineering Types =============
+
+/**
+ * Template variables for prompt rendering
+ */
+export type TemplateVariables = Record<string, unknown>;
+
+/**
+ * Template validation result
+ */
+export interface TemplateValidation {
+  valid: boolean;
+  errors: string[];
+}
+
+/**
+ * Prompt metadata
+ */
+export interface PromptMetadata {
+  name: string;
+  version: string;
+  description: string;
+  author?: string;
+  tags: string[];
+  variables: string[];
+  examples?: PromptExample[];
+  lastModified: Date;
+}
+
+/**
+ * Prompt example for few-shot learning
+ */
+export interface PromptExample {
+  id: string;
+  input: string;
+  output: unknown;
+  context?: Record<string, unknown>;
+  tags: string[];
+  difficulty?: 'easy' | 'medium' | 'hard';
+  domain?: string;
+}
+
+/**
+ * Loaded template with metadata
+ */
+export interface LoadedTemplate {
+  content: string;
+  metadata: PromptMetadata;
+  version: string;
+}
+
+/**
+ * Prompt version entry
+ */
+export interface PromptVersion {
+  version: string;
+  content: string;
+  metadata: PromptMetadata;
+  createdAt: Date;
+  isActive: boolean;
+}
+
+/**
+ * A/B Test configuration
+ */
+export interface ABTestConfig {
+  id: string;
+  name: string;
+  agentType: string;
+  versionA: string;
+  versionB: string;
+  trafficSplit: number; // 0-1, percentage for version A
+  startDate: Date;
+  endDate?: Date;
+  description?: string;
+}
+
+/**
+ * A/B Test results
+ */
+export interface ABTestResults {
+  testId: string;
+  status: 'running' | 'completed' | 'paused';
+  versionA: {
+    version: string;
+    usageCount: number;
+    avgTokens: number;
+    avgDuration: number;
+    errorRate: number;
+  };
+  versionB: {
+    version: string;
+    usageCount: number;
+    avgTokens: number;
+    avgDuration: number;
+    errorRate: number;
+  };
+  winner?: 'A' | 'B' | 'inconclusive';
+  confidence: number;
+  recommendation?: string;
+}
+
+/**
+ * Version comparison result
+ */
+export interface VersionComparison {
+  versionA: string;
+  versionB: string;
+  improvement: {
+    tokenUsage: number; // percentage
+    duration: number; // percentage
+    successRate: number; // percentage
+  };
+  recommendation: string;
+}
+
+/**
+ * Prompt usage tracking
+ */
+export interface PromptUsage {
+  agentType: string;
+  version: string;
+  timestamp: Date;
+  duration: number;
+  tokenUsage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  cost: number;
+  outcome: 'success' | 'error';
+  error?: string;
+  traceId?: string;
+  spanId?: string;
+}
+
+// ============= Context Engineering Types =============
+
+/**
+ * Context build parameters
+ */
+export interface BuildContextParams {
+  systemPrompt: string;
+  conversationHistory: ConversationMessage[];
+  currentQuery: string;
+  agentType: string;
+  maxTotalTokens?: number;
+  metadata?: {
+    sessionId: string;
+    stage: number;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Context build result
+ */
+export interface BuildContextResult {
+  messages: LLMMessage[];
+  stats: {
+    originalTokens: number;
+    compressedTokens: number;
+    compressionRatio: number;
+    strategy: string;
+  };
+}
+
+/**
+ * Conversation message
+ */
+export interface ConversationMessage {
+  role: string;
+  content: string;
+  timestamp?: number;
+}
+
+/**
+ * Compression parameters
+ */
+export interface CompressionParams {
+  messages: ConversationMessage[];
+  maxTokens: number;
+  currentQuery: string;
+  strategy?: 'summarization' | 'importance' | 'hybrid';
+}
+
+/**
+ * Compressed context result
+ */
+export interface CompressedContext {
+  messages: ConversationMessage[];
+  stats: {
+    originalCount: number;
+    compressedCount: number;
+    originalTokens: number;
+    compressedTokens: number;
+    compressionRatio: number;
+    strategy: string;
+  };
+}
+
+/**
+ * Token allocation parameters
+ */
+export interface AllocationParams {
+  maxTotalTokens: number;
+  systemPrompt: string;
+  conversationHistory: ConversationMessage[];
+  currentQuery: string;
+  agentType: string;
+}
+
+/**
+ * Token allocation result
+ */
+export interface TokenAllocation {
+  systemPrompt: number;
+  conversationHistory: number;
+  currentQuery: number;
+  reservedResponse: number;
+  total: number;
+}
+
+/**
+ * Context statistics
+ */
+export interface ContextStats {
+  totalMessages: number;
+  totalTokens: number;
+  compressionRatio: number;
+  lastCompressed?: Date;
+}
+
+/**
+ * Rolling window options
+ */
+export interface RollingWindowOptions {
+  minSize?: number;
+  maxSize?: number;
+  adaptive?: boolean;
+  tokenLimit?: number;
+}
+
+/**
+ * Context metadata
+ */
+export interface ContextMetadata {
+  sessionId: string;
+  stage: number;
+  agentType: string;
+  totalTokens?: number;
+}
+
+// ============= Schema Types =============
+
+/**
+ * Registered schema metadata
+ */
+export interface RegisteredSchema {
+  agentType: string;
+  zodSchema: unknown;
+  jsonSchema: object;
+  example: unknown;
+  version: string;
+  lastModified: Date;
+}
+
+/**
+ * Schema validation result
+ */
+export interface SchemaValidationResult<T = unknown> {
+  valid: boolean;
+  data?: T;
+  errors: string[];
+  path?: string;
+}
+
+/**
+ * Structured output options
+ */
+export interface StructuredOutputOptions {
+  retryOnValidationError?: boolean;
+  maxRetries?: number;
+  includeValidationInPrompt?: boolean;
+  initialDelay?: number;
+  timeout?: number;
+}
+
+/**
+ * Token usage statistics
+ */
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+/**
+ * Structured output result
+ */
+export interface StructuredOutputResult<T> {
+  data: T;
+  rawOutput: string;
+  validation: SchemaValidationResult<T>;
+  tokenUsage: TokenUsage;
+  duration: number;
+  attempt: number;
+}
+
+// ============= Observability Types =============
+
+/**
+ * Trace metadata
+ */
+export interface TraceMetadata {
+  sessionId: string;
+  agentType: string;
+  startTime: number;
+  userId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Span in trace
+ */
+export interface Span {
+  id: string;
+  parentId?: string;
+  name: string;
+  startTime: number;
+  endTime?: number;
+  metadata?: Record<string, unknown>;
+  status?: 'ok' | 'error';
+  error?: string;
+}
+
+/**
+ * Trace
+ */
+export interface Trace {
+  id: string;
+  metadata: TraceMetadata;
+  spans: Span[];
+  startTime: number;
+  endTime?: number;
+}
+
+/**
+ * Trace filters
+ */
+export interface TraceFilters {
+  sessionId?: string;
+  agentType?: string;
+  startTime?: number;
+  endTime?: number;
+  minDuration?: number;
+}
+
+/**
+ * LLM call cost
+ */
+export interface LLMLCallCost {
+  agentType: string;
+  promptTokens: number;
+  completionTokens: number;
+  model: string;
+  timestamp: Date;
+  cost?: number;
+}
+
+/**
+ * Cost filters
+ */
+export interface CostFilters {
+  agentType?: string;
+  startDate?: Date;
+  endDate?: Date;
+  minCost?: number;
+}
+
+/**
+ * Cost summary
+ */
+export interface CostSummary {
+  totalCost: number;
+  totalCalls: number;
+  avgCostPerCall: number;
+  byAgentType: Record<string, number>;
+  byModel: Record<string, number>;
+}
+
+/**
+ * Agent cost breakdown
+ */
+export interface AgentCostBreakdown {
+  agentType: string;
+  totalCost: number;
+  totalCalls: number;
+  avgCostPerCall: number;
+  avgTokensPerCall: number;
+  costByDay: Record<string, number>;
+}
+
+/**
+ * Optimization suggestion
+ */
+export interface OptimizationSuggestion {
+  type: 'caching' | 'compression' | 'temperature' | 'maxTokens';
+  agentType: string;
+  current: number;
+  suggested: number;
+  potentialSavings: number;
+  reasoning: string;
+}
+
+/**
+ * Cost forecast
+ */
+export interface CostForecast {
+  period: string;
+  forecastedCost: number;
+  confidence: number;
+  factors: string[];
+}
+
+/**
+ * Time period
+ */
+export interface TimePeriod {
+  start: Date;
+  end: Date;
+}
+
+/**
+ * Telemetry metrics
+ */
+export interface TelemetryMetrics {
+  promptCalls: number;
+  totalTokens: number;
+  avgDuration: number;
+  errorRate: number;
+  cacheHitRate: number;
+  byAgentType: Record<string, number>;
+}
+
+/**
+ * Dashboard configuration
+ */
+export interface DashboardConfig {
+  name: string;
+  metrics: string[];
+  filters?: Record<string, unknown>;
+  refreshInterval?: number;
+}
+
+/**
+ * Dashboard
+ */
+export interface Dashboard {
+  name: string;
+  metrics: TelemetryMetrics;
+  lastUpdated: Date;
+}
