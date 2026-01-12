@@ -1,23 +1,33 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-primary: #0A7BFF;
-  --color-background: #F5F7FA;
+  --color-primary: #0a7bff;
+  --color-background: #f5f7fa;
   --color-text-primary: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-border: #e5e7eb;
+  --color-text-secondary: #4b5563;
+  --color-border: #d1d5db;
 
   --animate-fadeIn: fadeIn 0.2s ease-out;
   --animate-slideUp: slideUp 0.3s ease-out;
 
   @keyframes fadeIn {
-    '0%': { opacity: 0; }
-    '100%': { opacity: 1; }
+    '0%': {
+      opacity: 0;
+    }
+    '100%': {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    '0%': { transform: translateY(20px); opacity: 0; }
-    '100%': { transform: translateY(0); opacity: 1; }
+    '0%': {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    '100%': {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 
@@ -25,12 +35,13 @@
   --primary: #0a7bff;
   --background: #f5f7fa;
   --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --border: #e5e7eb;
+  --text-secondary: #4b5563;
+  --border: #d1d5db;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background-color: var(--background);
   color: var(--text-primary);
   margin: 0;

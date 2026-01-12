@@ -124,7 +124,7 @@ export function RiskStage() {
                 </Card>
               ))}
               {highRisks.length === 0 && (
-                <p className="text-sm text-gray-400 italic">暂无高风险项</p>
+                <p className="text-sm text-gray-500 italic">暂无高风险项</p>
               )}
             </div>
           </div>
@@ -144,7 +144,7 @@ export function RiskStage() {
                 </Card>
               ))}
               {mediumRisks.length === 0 && (
-                <p className="text-sm text-gray-400 italic">暂无中风险项</p>
+                <p className="text-sm text-gray-500 italic">暂无中风险项</p>
               )}
             </div>
           </div>
@@ -164,7 +164,7 @@ export function RiskStage() {
                 </Card>
               ))}
               {lowRisks.length === 0 && (
-                <p className="text-sm text-gray-400 italic">暂无低风险项</p>
+                <p className="text-sm text-gray-500 italic">暂无低风险项</p>
               )}
             </div>
           </div>
@@ -179,12 +179,19 @@ export function RiskStage() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">对比项</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    对比项
+                  </th>
                   {approaches.map((approach) => (
-                    <th key={approach.id} className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    <th
+                      key={approach.id}
+                      className="px-4 py-3 text-center text-sm font-semibold text-gray-700"
+                    >
                       {approach.label}
                       {approach.recommended && (
-                        <Badge variant="success" className="ml-2 text-xs">推荐</Badge>
+                        <Badge variant="success" className="ml-2 text-xs">
+                          推荐
+                        </Badge>
                       )}
                     </th>
                   ))}
@@ -252,7 +259,9 @@ export function RiskStage() {
 
                   {selectedApproach === approach.id && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      <Badge variant="info" className="w-full justify-center">已选择</Badge>
+                      <Badge variant="info" className="w-full justify-center">
+                        已选择
+                      </Badge>
                     </div>
                   )}
                 </CardContent>

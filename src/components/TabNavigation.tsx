@@ -27,16 +27,14 @@ export function TabNavigation() {
                       relative px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300
                       ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' : ''}
                       ${isCompleted ? 'bg-green-50 text-green-700 hover:bg-green-100 hover:scale-105' : ''}
-                      ${isLocked ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-60' : ''}
+                      ${isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-80' : ''}
                       ${isClickable && !isActive ? 'hover:bg-gray-50 cursor-pointer' : ''}
                     `}
                   >
                     <div className="flex items-center space-x-2.5">
                       <span className="text-base">{tab.icon}</span>
                       <span>{tab.name}</span>
-                      {isCompleted && (
-                        <span className="text-green-600 font-bold text-lg">✓</span>
-                      )}
+                      {isCompleted && <span className="text-green-600 font-bold text-lg">✓</span>}
                     </div>
                     {isActive && (
                       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">

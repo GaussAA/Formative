@@ -52,11 +52,14 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
   }, [profile]);
 
   // 使用 useMemo 缓存 getHighlightClass 函数
-  const getHighlightClass = useCallback((key: string) => {
-    return highlights[key]
-      ? 'border-primary shadow-lg shadow-primary/20 animate-highlight-glow'
-      : '';
-  }, [highlights]);
+  const getHighlightClass = useCallback(
+    (key: string) => {
+      return highlights[key]
+        ? 'border-primary shadow-lg shadow-primary/20 animate-highlight-glow'
+        : '';
+    },
+    [highlights]
+  );
 
   // 使用 useMemo 缓存技术需求数据
   const techRequirements = useMemo(() => {
@@ -88,7 +91,9 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
     return reqs;
   }, [profile.needsDataStorage, profile.needsMultiUser, profile.needsAuth]);
 
-  const hasInfo = Object.keys(profile).filter(k => profile[k as keyof RequirementProfile] !== undefined).length > 0;
+  const hasInfo =
+    Object.keys(profile).filter((k) => profile[k as keyof RequirementProfile] !== undefined)
+      .length > 0;
 
   return (
     <div className="w-80 bg-slate-100 border-r border-slate-200 flex flex-col shadow-sm">
@@ -97,12 +102,22 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
       {/* Header */}
       <div className="px-6 py-5 bg-white border-b border-slate-200">
         <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center">
-          <svg className="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-5 h-5 mr-2 text-primary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
           已收集信息
         </h2>
-        <p className="text-xs text-gray-500 mt-1.5">实时更新的需求画像</p>
+        <p className="text-xs text-gray-600 mt-1.5">实时更新的需求画像</p>
       </div>
 
       {/* Collected Info - 滚动区域 */}
@@ -162,12 +177,22 @@ export function LeftPanel({ completeness, profile, onViewDocument }: LeftPanelPr
         ) : (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-200">
-              <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-10 h-10 text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
             </div>
             <p className="text-sm text-gray-600 font-medium mb-1">暂无收集到的信息</p>
-            <p className="text-xs text-gray-400">开始对话后，信息会在这里显示</p>
+            <p className="text-xs text-gray-500">开始对话后，信息会在这里显示</p>
           </div>
         )}
       </div>

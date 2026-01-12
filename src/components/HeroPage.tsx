@@ -36,7 +36,7 @@ export function HeroPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">定型 Formative</h1>
-                <p className="text-xs text-gray-500">让想法有形，让 AI 可执行</p>
+                <p className="text-xs text-gray-600">让想法有形，让 AI 可执行</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -64,10 +64,11 @@ export function HeroPage() {
             VibeCoding 的最前一公里
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            不是 AI 不行，<br />
+            不是 AI 不行，
+            <br />
             是需求没<span className="text-primary">定型</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed">
             在让 AI 写第一行代码之前，先让你的想法变成可执行的开发方案
           </p>
           <div className="mt-10 flex justify-center gap-4">
@@ -96,15 +97,19 @@ export function HeroPage() {
                 <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center">
                   <span className="text-2xl">❌</span>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">问题：不是 AI 不行，是人没准备好</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  问题：不是 AI 不行，是人没准备好
+                </h2>
               </div>
 
               <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
                 <p>大多数 VibeCoding 失败，并不是因为 AI 不会写代码。</p>
-                <p className="font-semibold text-gray-900">而是因为一开始，用户根本说不清楚自己想要什么。</p>
+                <p className="font-semibold text-gray-900">
+                  而是因为一开始，用户根本说不清楚自己想要什么。
+                </p>
 
                 <div className="bg-red-50 rounded-xl p-6 my-6">
-                  <p className="text-gray-600 mb-3">他们往往只有一句话的想法：</p>
+                  <p className="text-gray-700 mb-3">他们往往只有一句话的想法：</p>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-center">
                       <span className="text-red-500 mr-2">•</span>
@@ -121,7 +126,11 @@ export function HeroPage() {
                   </ul>
                 </div>
 
-                <p>于是 AI 开始猜，用户开始改；<br />AI 不断生成，用户不断推翻。</p>
+                <p>
+                  于是 AI 开始猜，用户开始改；
+                  <br />
+                  AI 不断生成，用户不断推翻。
+                </p>
 
                 <div className="bg-gray-900 text-gray-100 rounded-xl p-6 my-6">
                   <p className="font-semibold mb-3">最后的结果通常只有三种：</p>
@@ -149,28 +158,45 @@ export function HeroPage() {
               </div>
 
               <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
-                <p className="text-xl font-semibold text-gray-900">定型（Formative）不是一个写代码的工具。</p>
-                <p>它存在于 VibeCoding 的<span className="font-semibold text-primary">最前一公里</span>。</p>
+                <p className="text-xl font-semibold text-gray-900">
+                  定型（Formative）不是一个写代码的工具。
+                </p>
+                <p>
+                  它存在于 VibeCoding 的
+                  <span className="font-semibold text-primary">最前一公里</span>。
+                </p>
 
                 <div className="bg-blue-50 rounded-xl p-6 my-6">
-                  <p className="font-semibold text-gray-900 mb-4">在你让 AI 开始写第一行代码之前，定型会做三件关键的事：</p>
+                  <p className="font-semibold text-gray-900 mb-4">
+                    在你让 AI 开始写第一行代码之前，定型会做三件关键的事：
+                  </p>
                   <div className="space-y-4">
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">1</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">
+                        1
+                      </div>
                       <p>把一句白话需求，拆解成完整的工程问题</p>
                     </div>
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">2</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">
+                        2
+                      </div>
                       <p>暴露潜在风险，并给出可选方案</p>
                     </div>
                     <div className="flex items-start">
-                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">3</div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 mr-3 font-bold">
+                        3
+                      </div>
                       <p>帮你做出适合你的技术决策，而不是"看起来最酷的那种"</p>
                     </div>
                   </div>
                 </div>
 
-                <p>你不需要懂架构、不需要会数据库，<br />你只需要<span className="font-semibold text-primary">回答问题、做选择</span>。</p>
+                <p>
+                  你不需要懂架构、不需要会数据库，
+                  <br />
+                  你只需要<span className="font-semibold text-primary">回答问题、做选择</span>。
+                </p>
 
                 <p className="text-xl font-bold text-primary">剩下的复杂度，由定型替你承担。</p>
               </div>
@@ -185,7 +211,9 @@ export function HeroPage() {
                 <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
                   <span className="text-2xl">✅</span>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">结果：你第一次拥有"AI 能真正执行的方案"</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  结果：你第一次拥有"AI 能真正执行的方案"
+                </h2>
               </div>
 
               <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
@@ -197,7 +225,9 @@ export function HeroPage() {
                     <p className="text-sm text-gray-600">核心功能 vs 后续版本</p>
                   </div>
                   <div className="bg-green-50 rounded-xl p-5 border border-green-200">
-                    <div className="font-semibold text-gray-900 mb-2">🔧 已确定技术栈的开发方案</div>
+                    <div className="font-semibold text-gray-900 mb-2">
+                      🔧 已确定技术栈的开发方案
+                    </div>
                     <p className="text-sm text-gray-600">前端、后端、数据库、部署</p>
                   </div>
                   <div className="bg-green-50 rounded-xl p-5 border border-green-200">
@@ -229,7 +259,8 @@ export function HeroPage() {
                 </div>
 
                 <p className="text-xl font-bold text-gray-900">
-                  你负责想清楚，<br />
+                  你负责想清楚，
+                  <br />
                   定型负责让<span className="text-primary">"想清楚"</span>这件事真正落地。
                 </p>
               </div>
@@ -240,7 +271,7 @@ export function HeroPage() {
         {/* CTA Section */}
         <div className="mt-24 text-center bg-linear-to-r from-primary to-blue-600 rounded-3xl p-12 text-white">
           <h2 className="text-4xl font-bold mb-4">准备好让你的想法定型了吗？</h2>
-          <p className="text-xl text-blue-100 mb-8">5分钟，从一句话到完整方案</p>
+          <p className="text-xl text-blue-200 mb-8">5分钟，从一句话到完整方案</p>
           <button
             onClick={handleStart}
             className="px-10 py-5 bg-white text-primary rounded-2xl font-bold text-xl hover:shadow-2xl transition-all transform hover:scale-105"
@@ -251,7 +282,7 @@ export function HeroPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 mt-24">
+      <footer className="bg-gray-900 text-gray-500 py-12 mt-24">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <p className="text-sm">© 2025 定型 Formative. Powered by Jaguarliu&Trae</p>
           <p className="text-xs mt-2">让想法有形，让 AI 可执行</p>

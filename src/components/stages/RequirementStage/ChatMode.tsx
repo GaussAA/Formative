@@ -26,14 +26,17 @@ export function ChatMode({
     [input, sendMessage]
   );
 
-  const handleOptionClick = useCallback((label: string) => {
-    setInput((prevInput) => {
-      if (prevInput.trim()) {
-        return prevInput + ', ' + label;
-      }
-      return label;
-    });
-  }, [setInput]);
+  const handleOptionClick = useCallback(
+    (label: string) => {
+      setInput((prevInput) => {
+        if (prevInput.trim()) {
+          return prevInput + ', ' + label;
+        }
+        return label;
+      });
+    },
+    [setInput]
+  );
 
   return (
     <>
@@ -87,11 +90,20 @@ export function ChatMode({
                   // 初始加载状态
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      ></div>
                     </div>
-                    <span className="text-gray-500 text-sm">正在思考...</span>
+                    <span className="text-gray-600 text-sm">正在思考...</span>
                   </div>
                 )}
               </div>
@@ -121,7 +133,12 @@ export function ChatMode({
                 className="ml-2 p-2.5 bg-primary text-white rounded-xl hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
                 </svg>
               </button>
             </div>
@@ -133,7 +150,15 @@ export function ChatMode({
 }
 
 // 导入 ModeSwitcher（避免循环依赖）
-function ModeSwitcher({ mode, setMode, title }: { mode: 'chat' | 'form'; setMode: (m: 'chat' | 'form') => void; title: string }) {
+function ModeSwitcher({
+  mode,
+  setMode,
+  title,
+}: {
+  mode: 'chat' | 'form';
+  setMode: (m: 'chat' | 'form') => void;
+  title: string;
+}) {
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
