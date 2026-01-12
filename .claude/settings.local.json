@@ -61,7 +61,9 @@
       "Bash(pnpm rebuild:*)",
       "Bash(pnpm db:migrate)",
       "Bash(pnpm approve-builds:*)",
-      "Bash(npx node-gyp rebuild:*)"
+      "Bash(npx node-gyp rebuild:*)",
+      "Bash(pnpm tsx:*)",
+      "Bash(pnpm db:seed:*)"
     ]
   }
 }

@@ -172,7 +172,7 @@ describe('Chat API Integration Tests', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should handle rate limiting (if enabled)', { timeout: 10000 }, async () => {
+    it('should handle rate limiting (if enabled)', { timeout: 60000 }, async () => {
       // This test might fail if rate limiting is disabled or has different settings
       const promises = Array.from({ length: 35 }, () =>
         fetch(`${API_URL}/api/chat`, {
@@ -190,7 +190,7 @@ describe('Chat API Integration Tests', () => {
         const rateLimitResponse = responses.find(r => r.status === 429);
         expect(rateLimitResponse?.headers.get('X-RateLimit-Remaining')).toBeTruthy();
       }
-    }, 60000);
+    });
   });
 
   describe('Session management', () => {

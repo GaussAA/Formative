@@ -144,7 +144,7 @@ describe('Asker Agent', () => {
 
       await askerNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('缺失的字段：产品目标, 目标用户, 核心功能');
     });
 
@@ -163,7 +163,7 @@ describe('Asker Agent', () => {
 
       await askerNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('当前阶段：3');
     });
 
@@ -182,7 +182,7 @@ describe('Asker Agent', () => {
 
       await askerNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('已经问过的问题：');
       expect(contextArg).toContain('之前的问题1');
       expect(contextArg).toContain('之前的问题2');
@@ -278,7 +278,7 @@ describe('Asker Agent', () => {
 
       const state = createMockState({
         profile: createMockProfile({
-          productName: 'TestApp',
+          projectName: 'TestApp',
         }),
       });
 

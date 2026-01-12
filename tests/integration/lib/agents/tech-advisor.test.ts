@@ -245,8 +245,8 @@ describe('TechAdvisor Agent', () => {
       vi.mocked(callLLMWithJSONByAgent).mockResolvedValueOnce(mockResponse);
 
       const existingSummary = {
-        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test' },
-        [Stage.RISK_ANALYSIS]: { risks: ['Risk 1'] },
+        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test', targetUsers: 'Users', coreFunctions: ['Feature'] },
+        [Stage.RISK_ANALYSIS]: { risks: ['Risk 1'], selectedApproach: 'approach-1' },
       };
 
       const state = createMockState({
@@ -257,8 +257,8 @@ describe('TechAdvisor Agent', () => {
       const result = await techAdvisorNode(state);
 
       // Should preserve existing summaries
-      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test' });
-      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ risks: ['Risk 1'] });
+      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test', targetUsers: 'Users', coreFunctions: ['Feature'] });
+      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ risks: ['Risk 1'], selectedApproach: 'approach-1' });
 
       // Should add new tech stack summary
       expect(result.summary?.[Stage.TECH_STACK]).toBeDefined();
@@ -285,7 +285,7 @@ describe('TechAdvisor Agent', () => {
 
       await techAdvisorNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('风险分析总结');
       expect(contextArg).toContain('技术风险');
     });

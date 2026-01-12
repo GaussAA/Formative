@@ -256,6 +256,7 @@ describe('RiskAnalyst Agent', () => {
         [Stage.REQUIREMENT_COLLECTION]: {
           productGoal: 'Build test app',
           targetUsers: 'Developers',
+          coreFunctions: ['功能1', '功能2'],
         },
       };
 
@@ -270,6 +271,7 @@ describe('RiskAnalyst Agent', () => {
       expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({
         productGoal: 'Build test app',
         targetUsers: 'Developers',
+        coreFunctions: ['功能1', '功能2'],
       });
 
       // Should add new risk analysis summary

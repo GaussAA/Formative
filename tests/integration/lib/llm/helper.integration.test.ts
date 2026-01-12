@@ -102,7 +102,7 @@ describe('LLM Helper Integration Tests', () => {
 
       // Verify instance was created with correct config
       expect(llm).toBeDefined();
-      expect(llm.config).toMatchObject({
+      expect((llm as any).config).toMatchObject({
         model: 'deepseek-chat',
         temperature: 0.7,
         apiKey: expect.any(String),
@@ -119,7 +119,7 @@ describe('LLM Helper Integration Tests', () => {
         model: 'custom-model',
       });
 
-      expect(llm.config).toMatchObject({
+      expect((llm as any).config).toMatchObject({
         temperature: 0.5,
         maxTokens: 500,
         model: 'custom-model',
@@ -129,7 +129,7 @@ describe('LLM Helper Integration Tests', () => {
     it('should create LLM with agentType config', () => {
       const llm = createLLM({ agentType: 'extractor' });
 
-      expect(llm.config).toMatchObject({
+      expect((llm as any).config).toMatchObject({
         temperature: 0.1,
         maxTokens: 1000,
       });
@@ -143,7 +143,7 @@ describe('LLM Helper Integration Tests', () => {
 
       expect(llm).toBeDefined();
       // Verify ollama uses the configured API key
-      expect(llm.config.apiKey).toBeTruthy();
+      expect((llm as any).config.apiKey).toBeTruthy();
     });
   });
 

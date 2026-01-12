@@ -75,10 +75,10 @@ describe('SpecGenerator Agent', () => {
       const state = createMockState({
         profile: createMockProfile(),
         summary: {
-          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'AI社区' },
-          [Stage.RISK_ANALYSIS]: { selectedApproach: 'mvp' },
-          [Stage.TECH_STACK]: { techStack: { category: 'fullstack' } },
-          [Stage.MVP_BOUNDARY]: { mvpFeatures: ['注册', '发布'] },
+          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'AI社区', targetUsers: '开发者', coreFunctions: ['内容发布', '交流讨论'] },
+          [Stage.RISK_ANALYSIS]: { risks: ['技术风险'], selectedApproach: 'mvp' },
+          [Stage.TECH_STACK]: { techStack: { category: 'fullstack', frontend: 'Next.js' }, reasoning: '全栈方案' },
+          [Stage.MVP_BOUNDARY]: { mvpFeatures: ['注册', '发布'], nonGoals: ['支付功能'] },
         },
       });
 
@@ -110,16 +110,16 @@ describe('SpecGenerator Agent', () => {
       const state = createMockState({
         profile: createMockProfile(),
         summary: {
-          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Goal' },
-          [Stage.RISK_ANALYSIS]: { risks: ['Risk1'] },
-          [Stage.TECH_STACK]: { techStack: { frontend: 'React' } },
-          [Stage.MVP_BOUNDARY]: { mvpFeatures: ['Feature1'] },
+          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Goal', targetUsers: 'Users', coreFunctions: ['Feature1'] },
+          [Stage.RISK_ANALYSIS]: { risks: ['Risk1'], selectedApproach: 'approach-1' },
+          [Stage.TECH_STACK]: { techStack: { category: 'frontend-only' as const, frontend: 'React' }, reasoning: '前端框架' },
+          [Stage.MVP_BOUNDARY]: { mvpFeatures: ['Feature1'], nonGoals: [] },
         },
       });
 
       await specGeneratorNode(state);
 
-      const contextArg = vi.mocked(callLLMByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('阶段总结');
       // Note: JSON.stringify uses numeric keys for Stage enum
       expect(contextArg).toContain('"1"'); // REQUIREMENT_COLLECTION
@@ -135,9 +135,9 @@ describe('SpecGenerator Agent', () => {
       vi.mocked(callLLMByAgent).mockResolvedValueOnce(mockSpec);
 
       const existingSummary = {
-        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test Goal' },
-        [Stage.RISK_ANALYSIS]: { selectedApproach: 'approach-1' },
-        [Stage.TECH_STACK]: { techStack: { category: 'frontend' } },
+        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test Goal', targetUsers: 'Test Users', coreFunctions: ['Feature'] },
+        [Stage.RISK_ANALYSIS]: { risks: ['Risk'], selectedApproach: 'approach-1' },
+        [Stage.TECH_STACK]: { techStack: { category: 'frontend-only' as const, frontend: 'React' }, reasoning: '前端框架' },
       };
 
       const state = createMockState({
@@ -148,9 +148,9 @@ describe('SpecGenerator Agent', () => {
       const result = await specGeneratorNode(state);
 
       // Should preserve all existing summaries
-      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test Goal' });
-      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ selectedApproach: 'approach-1' });
-      expect(result.summary?.[Stage.TECH_STACK]).toEqual({ techStack: { category: 'frontend' } });
+      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test Goal', targetUsers: 'Test Users', coreFunctions: ['Feature'] });
+      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ risks: ['Risk'], selectedApproach: 'approach-1' });
+      expect(result.summary?.[Stage.TECH_STACK]).toEqual({ techStack: { category: 'frontend-only' as const, frontend: 'React' }, reasoning: '前端框架' });
 
       // Should add new documentation summary
       expect(result.summary?.[Stage.DOCUMENT_GENERATION]?.finalSpec).toBe('# Spec');

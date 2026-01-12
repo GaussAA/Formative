@@ -100,7 +100,7 @@ describe('routeNext', () => {
         currentStage: Stage.RISK_ANALYSIS,
         needMoreInfo: false,
         summary: {
-          [Stage.RISK_ANALYSIS]: { selectedApproach: 'mvp' },
+          [Stage.RISK_ANALYSIS]: { risks: [], selectedApproach: 'mvp' },
         },
       });
 
@@ -112,7 +112,7 @@ describe('routeNext', () => {
         currentStage: Stage.RISK_ANALYSIS,
         needMoreInfo: false,
         summary: {
-          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test' },
+          [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test', targetUsers: 'Users', coreFunctions: [] },
         },
       });
 
@@ -166,7 +166,7 @@ describe('routeNext', () => {
         currentStage: Stage.TECH_STACK,
         needMoreInfo: false,
         summary: {
-          [Stage.RISK_ANALYSIS]: { risks: ['Risk1'] },
+          [Stage.RISK_ANALYSIS]: { risks: ['Risk1'], selectedApproach: '' },
         },
       });
 
@@ -194,6 +194,7 @@ describe('routeNext', () => {
         needMoreInfo: true,
         summary: {
           [Stage.TECH_STACK]: {
+            techStack: { category: 'frontend-only' as const, frontend: 'React' },
             reasoning: 'Use frontend-only',
           },
         },
@@ -236,7 +237,7 @@ describe('routeNext', () => {
         summary: {
           [Stage.MVP_BOUNDARY]: {
             mvpFeatures: ['Auth', 'Dashboard'],
-            futureFeatures: ['Analytics', 'Reports'],
+            nonGoals: ['Analytics', 'Reports'],
           },
         },
       });
@@ -251,7 +252,7 @@ describe('routeNext', () => {
         summary: {
           [Stage.MVP_BOUNDARY]: {
             mvpFeatures: ['Feature 1', 'Feature 2'],
-            futureFeatures: ['Feature 3'],
+            nonGoals: ['Feature 3'],
           },
         },
       });

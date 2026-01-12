@@ -78,10 +78,10 @@ describe('tokenCounter', () => {
   });
 
   describe('logTokenUsage', () => {
-    let mockLogger: { info: ReturnType<typeof vi.fn> };
+    let mockLogger: Pick<Console, 'info'>;
 
     beforeEach(() => {
-      mockLogger = { info: vi.fn() };
+      mockLogger = { info: vi.fn() as unknown as Console['info'] };
     });
 
     it('should log token usage with provided logger', () => {

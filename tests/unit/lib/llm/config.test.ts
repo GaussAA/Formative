@@ -24,57 +24,57 @@ describe('LLM config', () => {
     });
 
     it('should have extractor config with low temperature', () => {
-      expect(LLM_CONFIGS.extractor.temperature).toBe(0.1);
-      expect(LLM_CONFIGS.extractor.maxTokens).toBe(1000);
-      expect(LLM_CONFIGS.extractor.description).toBe('需求信息提取，结构化JSON输出');
+      expect(LLM_CONFIGS.extractor!.temperature).toBe(0.1);
+      expect(LLM_CONFIGS.extractor!.maxTokens).toBe(1000);
+      expect(LLM_CONFIGS.extractor!.description).toBe('需求信息提取，结构化JSON输出');
     });
 
     it('should have planner config', () => {
-      expect(LLM_CONFIGS.planner.temperature).toBe(0.2);
-      expect(LLM_CONFIGS.planner.maxTokens).toBe(800);
-      expect(LLM_CONFIGS.planner.description).toBe('对话规划，引导用户完成需求采集');
+      expect(LLM_CONFIGS.planner!.temperature).toBe(0.2);
+      expect(LLM_CONFIGS.planner!.maxTokens).toBe(800);
+      expect(LLM_CONFIGS.planner!.description).toBe('对话规划，引导用户完成需求采集');
     });
 
     it('should have asker config with moderate temperature', () => {
-      expect(LLM_CONFIGS.asker.temperature).toBe(0.5);
-      expect(LLM_CONFIGS.asker.maxTokens).toBe(500);
-      expect(LLM_CONFIGS.asker.description).toBe('生成针对性澄清问题');
+      expect(LLM_CONFIGS.asker!.temperature).toBe(0.5);
+      expect(LLM_CONFIGS.asker!.maxTokens).toBe(500);
+      expect(LLM_CONFIGS.asker!.description).toBe('生成针对性澄清问题');
     });
 
     it('should have risk config', () => {
-      expect(LLM_CONFIGS.risk.temperature).toBe(0.3);
-      expect(LLM_CONFIGS.risk.maxTokens).toBe(1500);
-      expect(LLM_CONFIGS.risk.description).toBe('风险识别和分析');
+      expect(LLM_CONFIGS.risk!.temperature).toBe(0.3);
+      expect(LLM_CONFIGS.risk!.maxTokens).toBe(1500);
+      expect(LLM_CONFIGS.risk!.description).toBe('风险识别和分析');
     });
 
     it('should have tech config', () => {
-      expect(LLM_CONFIGS.tech.temperature).toBe(0.3);
-      expect(LLM_CONFIGS.tech.maxTokens).toBe(1500);
-      expect(LLM_CONFIGS.tech.description).toBe('技术栈选型建议');
+      expect(LLM_CONFIGS.tech!.temperature).toBe(0.3);
+      expect(LLM_CONFIGS.tech!.maxTokens).toBe(1500);
+      expect(LLM_CONFIGS.tech!.description).toBe('技术栈选型建议');
     });
 
     it('should have mvp config', () => {
-      expect(LLM_CONFIGS.mvp.temperature).toBe(0.3);
-      expect(LLM_CONFIGS.mvp.maxTokens).toBe(1500);
-      expect(LLM_CONFIGS.mvp.description).toBe('MVP 功能边界规划');
+      expect(LLM_CONFIGS.mvp!.temperature).toBe(0.3);
+      expect(LLM_CONFIGS.mvp!.maxTokens).toBe(1500);
+      expect(LLM_CONFIGS.mvp!.description).toBe('MVP 功能边界规划');
     });
 
     it('should have diagram config with low temperature', () => {
-      expect(LLM_CONFIGS.diagram.temperature).toBe(0.1);
-      expect(LLM_CONFIGS.diagram.maxTokens).toBe(2000);
-      expect(LLM_CONFIGS.diagram.description).toBe('架构图表和流程图生成');
+      expect(LLM_CONFIGS.diagram!.temperature).toBe(0.1);
+      expect(LLM_CONFIGS.diagram!.maxTokens).toBe(2000);
+      expect(LLM_CONFIGS.diagram!.description).toBe('架构图表和流程图生成');
     });
 
     it('should have spec config with highest token limit', () => {
-      expect(LLM_CONFIGS.spec.temperature).toBe(0.2);
-      expect(LLM_CONFIGS.spec.maxTokens).toBe(4000);
-      expect(LLM_CONFIGS.spec.description).toBe('完整开发方案文档生成');
+      expect(LLM_CONFIGS.spec!.temperature).toBe(0.2);
+      expect(LLM_CONFIGS.spec!.maxTokens).toBe(4000);
+      expect(LLM_CONFIGS.spec!.description).toBe('完整开发方案文档生成');
     });
 
     it('should have formValidator config', () => {
-      expect(LLM_CONFIGS.formValidator.temperature).toBe(0.2);
-      expect(LLM_CONFIGS.formValidator.maxTokens).toBe(1000);
-      expect(LLM_CONFIGS.formValidator.description).toBe('表单数据验证和澄清');
+      expect(LLM_CONFIGS.formValidator!.temperature).toBe(0.2);
+      expect(LLM_CONFIGS.formValidator!.maxTokens).toBe(1000);
+      expect(LLM_CONFIGS.formValidator!.description).toBe('表单数据验证和澄清');
     });
 
     it('should have temperatures in valid range (0-1)', () => {

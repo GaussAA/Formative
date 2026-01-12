@@ -61,7 +61,7 @@ describe('validateEnv', () => {
       for (const nodeEnv of validEnvs) {
         vi.resetModules();
         process.env.LLM_API_KEY = 'test-api-key';
-        process.env.NODE_ENV = nodeEnv;
+        (process.env as any).NODE_ENV = nodeEnv;
 
         const { env } = await import('@/config/env');
 
@@ -220,7 +220,7 @@ describe('validateEnv', () => {
 
     it('should throw error when NODE_ENV is invalid', async () => {
       process.env.LLM_API_KEY = 'test-api-key';
-      process.env.NODE_ENV = 'staging';
+      (process.env as any).NODE_ENV = 'staging';
 
       vi.resetModules();
 
@@ -240,7 +240,7 @@ describe('validateEnv', () => {
   describe('validation errors - multiple errors', () => {
     it('should throw error when multiple required fields are missing', async () => {
       delete process.env.LLM_API_KEY;
-      process.env.NODE_ENV = 'invalid';
+      (process.env as any).NODE_ENV = 'invalid';
 
       vi.resetModules();
 
@@ -261,7 +261,7 @@ describe('validateEnv', () => {
     it('should throw error when required and optional fields are invalid', async () => {
       process.env.LLM_API_KEY = '';
       process.env.LLM_BASE_URL = 'not-a-url';
-      process.env.NODE_ENV = 'invalid-env';
+      (process.env as any).NODE_ENV = 'invalid-env';
 
       vi.resetModules();
 

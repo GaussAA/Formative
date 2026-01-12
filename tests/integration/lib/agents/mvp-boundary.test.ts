@@ -72,10 +72,12 @@ describe('MVPBoundary Agent', () => {
         profile: createMockProfile(),
         summary: {
           [Stage.RISK_ANALYSIS]: {
+            risks: ['技术风险'],
             selectedApproach: 'mvp-first',
           },
           [Stage.TECH_STACK]: {
             techStack: { category: 'fullstack', frontend: 'Next.js' },
+            reasoning: '全栈方案适合复杂应用',
           },
         },
       });
@@ -200,9 +202,9 @@ describe('MVPBoundary Agent', () => {
       vi.mocked(callLLMWithJSONByAgent).mockResolvedValueOnce(mockResponse);
 
       const existingSummary = {
-        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test' },
-        [Stage.RISK_ANALYSIS]: { risks: ['Risk'] },
-        [Stage.TECH_STACK]: { techStack: { category: 'frontend' } },
+        [Stage.REQUIREMENT_COLLECTION]: { productGoal: 'Test', targetUsers: 'Users', coreFunctions: ['Feature'] },
+        [Stage.RISK_ANALYSIS]: { risks: ['Risk'], selectedApproach: 'approach-1' },
+        [Stage.TECH_STACK]: { techStack: { category: 'frontend-only' as const, frontend: 'React' }, reasoning: 'Simple' },
       };
 
       const state = createMockState({
@@ -213,9 +215,9 @@ describe('MVPBoundary Agent', () => {
       const result = await mvpBoundaryNode(state);
 
       // Should preserve existing summaries
-      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test' });
-      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ risks: ['Risk'] });
-      expect(result.summary?.[Stage.TECH_STACK]).toEqual({ techStack: { category: 'frontend' } });
+      expect(result.summary?.[Stage.REQUIREMENT_COLLECTION]).toEqual({ productGoal: 'Test', targetUsers: 'Users', coreFunctions: ['Feature'] });
+      expect(result.summary?.[Stage.RISK_ANALYSIS]).toEqual({ risks: ['Risk'], selectedApproach: 'approach-1' });
+      expect(result.summary?.[Stage.TECH_STACK]).toEqual({ techStack: { category: 'frontend-only' as const, frontend: 'React' }, reasoning: 'Simple' });
 
       // Should add new MVP summary
       expect(result.summary?.[Stage.MVP_BOUNDARY]).toBeDefined();
@@ -268,7 +270,7 @@ describe('MVPBoundary Agent', () => {
 
       await mvpBoundaryNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('风险分析');
       expect(contextArg).toContain('技术选型');
     });

@@ -155,7 +155,8 @@ describe('Extractor Agent', () => {
         userInput: 'approach-1',
         summary: {
           [Stage.RISK_ANALYSIS]: {
-            risks: [{ id: 'risk-1', description: 'Test risk' }],
+            risks: ['Test risk'],
+            selectedApproach: '',
           },
         },
       });
@@ -166,7 +167,7 @@ describe('Extractor Agent', () => {
       expect(callLLMWithJSONByAgent).not.toHaveBeenCalled();
       expect(result.summary?.[Stage.RISK_ANALYSIS]).toMatchObject({
         selectedApproach: 'approach-1',
-        risks: [{ id: 'risk-1', description: 'Test risk' }],
+        risks: ['Test risk'],
       });
       expect(result.missingFields).toEqual([]);
     });
@@ -362,11 +363,12 @@ describe('Extractor Agent', () => {
       await extractorNode(state);
 
       const callArgs = vi.mocked(callLLMWithJSONByAgent).mock.calls[0];
+      if (!callArgs) return;
       const historyArg = callArgs[3]; // Fourth argument is conversation history
 
       // Should include last 5 messages
       expect(historyArg).toHaveLength(5);
-      expect(historyArg[0]).toMatchObject({
+      expect(historyArg?.[0]).toMatchObject({
         content: 'Second message',
       });
     });

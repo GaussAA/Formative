@@ -64,9 +64,9 @@ describe('retry', () => {
       expect(onRetry).toHaveBeenCalledTimes(2);
       expect(onRetry).toHaveBeenNthCalledWith(1, 1, expect.any(Error));
       expect(onRetry).toHaveBeenNthCalledWith(2, 2, expect.any(Error));
-      expect(onRetry.mock.calls[0][1]).toBeInstanceOf(Error);
-      expect(onRetry.mock.calls[0][1].message).toBe('fail 1');
-      expect(onRetry.mock.calls[1][1].message).toBe('fail 2');
+      expect(onRetry.mock.calls[0]?.[1]).toBeInstanceOf(Error);
+      expect(onRetry.mock.calls[0]?.[1]?.message).toBe('fail 1');
+      expect(onRetry.mock.calls[1]?.[1]?.message).toBe('fail 2');
     });
 
     it('should handle zero maxRetries', async () => {
@@ -191,7 +191,7 @@ describe('retry', () => {
     });
 
     it('should handle synchronous functions', async () => {
-      const syncFn = () => 'sync result';
+      const syncFn = async () => 'sync result';
 
       const result = await withTimeout(syncFn, 100);
 

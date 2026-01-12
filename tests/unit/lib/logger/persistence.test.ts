@@ -55,7 +55,7 @@ describe('LogPersistence', () => {
       const files = fs.readdirSync(TEST_LOG_DIR);
       expect(files.length).toBeGreaterThan(0);
 
-      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]), 'utf-8');
+      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]!), 'utf-8');
       const parsed = JSON.parse(content.trim());
       expect(parsed.message).toBe('Test message');
     });
@@ -91,12 +91,12 @@ describe('LogPersistence', () => {
       persistence.write(entry2);
 
       const files = fs.readdirSync(TEST_LOG_DIR);
-      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]), 'utf-8');
+      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]!), 'utf-8');
       const lines = content.trim().split('\n');
 
       expect(lines.length).toBe(2);
-      expect(JSON.parse(lines[0]).message).toBe('First message');
-      expect(JSON.parse(lines[1]).message).toBe('Second message');
+      expect(JSON.parse(lines[0]!).message).toBe('First message');
+      expect(JSON.parse(lines[1]!).message).toBe('Second message');
     });
 
     it('should rotate when size limit exceeded', () => {
@@ -138,7 +138,7 @@ describe('LogPersistence', () => {
       p.write(entry);
 
       const files = fs.readdirSync(TEST_LOG_DIR);
-      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]), 'utf-8');
+      const content = fs.readFileSync(path.join(TEST_LOG_DIR, files[0]!), 'utf-8');
 
       // Pretty printed should have newlines and indentation
       expect(content).toContain('\n');
@@ -200,9 +200,9 @@ describe('LogPersistence', () => {
       const files = persistence.getLogFiles();
 
       expect(files.length).toBe(2);
-      expect(files[0].date).toBe('2025-01-11'); // Sorted by date descending
-      expect(files[1].date).toBe('2025-01-10');
-      expect(files[0].size).toBeGreaterThan(0);
+      expect(files[0]?.date).toBe('2025-01-11'); // Sorted by date descending
+      expect(files[1]?.date).toBe('2025-01-10');
+      expect(files[0]?.size).toBeGreaterThan(0);
     });
   });
 
@@ -218,8 +218,8 @@ describe('LogPersistence', () => {
       const result = persistence.readFromFile(filePath);
 
       expect(result.length).toBe(2);
-      expect(result[0].message).toBe('Msg1');
-      expect(result[1].message).toBe('Msg2');
+      expect(result[0]?.message).toBe('Msg1');
+      expect(result[1]?.message).toBe('Msg2');
     });
 
     it('should respect limit parameter', () => {
@@ -286,7 +286,7 @@ describe('LogPersistence', () => {
       const content = fs.readFileSync(exportPath, 'utf-8');
       const lines = content.trim().split('\n');
       expect(lines.length).toBe(1);
-      expect(JSON.parse(lines[0]).message).toBe('middle');
+      expect(JSON.parse(lines[0]!).message).toBe('middle');
     });
   });
 
@@ -324,9 +324,9 @@ describe('Logger with File Persistence', () => {
   afterEach(() => {
     // Re-mock the logger after these tests
     vi.doMock('@/lib/logger', async (importOriginal) => {
-      const actual = await importOriginal();
+      const actual = await importOriginal<typeof import('@/lib/logger')>();
       return {
-        ...actual,
+        ...(typeof actual === 'object' && actual !== null ? actual : {}),
         default: {
           debug: vi.fn(),
           info: vi.fn(),
@@ -353,7 +353,7 @@ describe('Logger with File Persistence', () => {
     const files = fs.readdirSync(testDir);
     expect(files.length).toBeGreaterThan(0);
 
-    const content = fs.readFileSync(path.join(testDir, files[0]), 'utf-8');
+    const content = fs.readFileSync(path.join(testDir, files[0]!), 'utf-8');
     const parsed = JSON.parse(content.trim());
     expect(parsed.message).toBe('Test message');
     expect(parsed.context).toEqual({ key: 'value' });
@@ -388,7 +388,7 @@ describe('Logger with File Persistence', () => {
     });
 
     const files = fs.readdirSync(testDir);
-    const content = fs.readFileSync(path.join(testDir, files[0]), 'utf-8');
+    const content = fs.readFileSync(path.join(testDir, files[0]!), 'utf-8');
     const parsed = JSON.parse(content.trim());
 
     expect(parsed.traceId).toBe('test-trace-123');
@@ -417,7 +417,7 @@ describe('Logger with File Persistence', () => {
     expect(totalSize).toBeGreaterThan(0);
 
     // Test readLogsFromFile
-    const entries = logger.readLogsFromFile(files[0].filePath);
+    const entries = logger.readLogsFromFile(files[0]!.filePath);
     expect(entries.length).toBeGreaterThanOrEqual(2);
   });
 

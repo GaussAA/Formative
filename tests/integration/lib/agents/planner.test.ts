@@ -123,7 +123,7 @@ describe('Planner Agent', () => {
 
     it('should recognize complete requirements', async () => {
       const completeProfile = createMockProfile({
-        productName: 'Test App',
+        projectName: 'Test App',
         productGoal: 'Build something great',
         targetUsers: 'Developers',
         useCases: 'Testing',
@@ -219,7 +219,7 @@ describe('Planner Agent', () => {
   describe('stage transitions - REQUIREMENT_COLLECTION', () => {
     it('should transition to RISK_ANALYSIS when complete', async () => {
       const completeProfile = createMockProfile({
-        productName: 'Test',
+        projectName: 'Test',
         productGoal: 'Goal',
         targetUsers: 'Users',
         useCases: 'Cases',
@@ -252,7 +252,7 @@ describe('Planner Agent', () => {
 
     it('should stay in REQUIREMENT_COLLECTION when incomplete', async () => {
       const incompleteProfile = createMockProfile({
-        productName: 'Test',
+        projectName: 'Test',
         productGoal: 'Goal',
         // Missing most fields - keep it incomplete
         targetUsers: undefined,
@@ -331,6 +331,7 @@ describe('Planner Agent', () => {
         summary: {
           [Stage.RISK_ANALYSIS]: {
             risks: [],
+            selectedApproach: '',
           },
         },
       });
@@ -389,7 +390,10 @@ describe('Planner Agent', () => {
         profile: createMockProfile(),
         currentStage: Stage.TECH_STACK,
         summary: {
-          [Stage.TECH_STACK]: {},
+          [Stage.TECH_STACK]: {
+            techStack: { category: 'frontend-only' as const, frontend: 'React' },
+            reasoning: 'Simple',
+          },
         },
       });
 
@@ -430,7 +434,7 @@ describe('Planner Agent', () => {
 
       const state = createMockState({
         profile: createMockProfile({
-          productName: 'Test',
+          projectName: 'Test',
           productGoal: 'Goal',
           // Incomplete profile - missing key fields
           targetUsers: undefined,
@@ -452,7 +456,7 @@ describe('Planner Agent', () => {
 
       const state = createMockState({
         profile: createMockProfile({
-          productName: 'Test',
+          projectName: 'Test',
           productGoal: 'Goal',
           targetUsers: 'Users',
           useCases: 'Cases',

@@ -3,7 +3,7 @@
  * Drizzle ORM schema definitions for SQLite
  */
 
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, unique } from 'drizzle-orm/sqlite-core';
 
 /**
  * Sessions table
@@ -51,7 +51,7 @@ export const stageSummaries = sqliteTable('stage_summaries', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 }, (table) => ({
-  sessionStageIdx: index('stage_summaries_session_stage_idx').on(table.sessionId, table.stage),
+  sessionStageIdx: unique('stage_summaries_session_stage_idx').on(table.sessionId, table.stage),
 }));
 
 /**

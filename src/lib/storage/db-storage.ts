@@ -268,8 +268,13 @@ export class SQLiteStorage implements MemoryStorage {
   async deleteSession(sessionId: string): Promise<void> {
     await this.ensureInitialized();
     try {
-      // Delete cascades to messages and stageSummaries
+      // Manually delete related data first (sql.js doesn't support cascade delete)
+      await db.delete(stageSummaries).where(eq(stageSummaries.sessionId, sessionId));
+      await db.delete(messages).where(eq(messages.sessionId, sessionId));
+
+      // Then delete the session
       await db.delete(sessions).where(eq(sessions.sessionId, sessionId));
+
       this.persist();
       logger.info('Session deleted', { sessionId });
     } catch (error) {

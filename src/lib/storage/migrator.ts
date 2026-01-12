@@ -4,7 +4,7 @@
  */
 
 import { migrate } from 'drizzle-orm/sql-js/migrator';
-import { initDatabase, saveDatabase, getDb } from '@/db/connection';
+import { initDatabase, saveDatabase, getDb, closeDatabase } from '@/db/connection';
 import logger from '@/lib/logger';
 
 /**
@@ -23,8 +23,12 @@ export async function runMigrations(): Promise<void> {
     saveDatabase();
 
     logger.info('Database migrations completed successfully');
+
+    // Close database connection before exit
+    await closeDatabase();
   } catch (error) {
     logger.error('Database migration failed', { error });
+    await closeDatabase();
     throw error;
   }
 }
@@ -33,6 +37,9 @@ export async function runMigrations(): Promise<void> {
 if (require.main === module) {
   (async () => {
     await runMigrations();
+    // Add small delay to allow libuv to clean up handles
+    // This prevents assertion errors on Windows
+    await new Promise((resolve) => setTimeout(resolve, 100));
     process.exit(0);
   })().catch((error) => {
     console.error('Migration failed:', error);

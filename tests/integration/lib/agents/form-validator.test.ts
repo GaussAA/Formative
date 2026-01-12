@@ -336,7 +336,7 @@ describe('FormValidator Agent', () => {
 
       await formValidatorNode(state);
 
-      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0][2];
+      const contextArg = vi.mocked(callLLMWithJSONByAgent).mock.calls[0]?.[2];
       expect(contextArg).toContain('请检查这些信息的合理性和完整性');
       expect(contextArg).toContain('产品目标是否清晰具体？');
       expect(contextArg).toContain('目标用户是否明确？');
