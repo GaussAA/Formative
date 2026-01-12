@@ -55,7 +55,13 @@
       "Bash(if not exist:*)",
       "Bash(pnpm run build:*)",
       "Bash(tail:*)",
-      "Bash(pnpm diagnostic:*)"
+      "Bash(pnpm diagnostic:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(pnpm db:migrate)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(npx node-gyp rebuild:*)"
     ]
   }
 }

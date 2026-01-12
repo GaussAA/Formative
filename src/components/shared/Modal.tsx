@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -15,6 +16,9 @@ export interface ModalProps {
   closeOnOverlay?: boolean;
 }
 
+/**
+ * Modal component with smooth animations and dark mode support
+ */
 export function Modal({
   isOpen,
   onClose,
@@ -27,7 +31,6 @@ export function Modal({
   showCancel = true,
   closeOnOverlay = true,
 }: ModalProps) {
-  // ESC键关闭弹窗
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -37,7 +40,6 @@ export function Modal({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      // 防止背景滚动
       document.body.style.overflow = 'hidden';
     }
 
@@ -63,37 +65,48 @@ export function Modal({
   };
 
   const confirmButtonStyles = {
-    primary: 'bg-primary hover:bg-blue-600 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    success: 'bg-green-600 hover:bg-green-700 text-white',
+    primary:
+      'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-lg shadow-primary-500/25',
+    danger:
+      'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-500/25',
+    success:
+      'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg shadow-green-500/25',
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-slideUp">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scaleIn overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Content */}
         <div className="px-6 py-5">
           {typeof content === 'string' ? (
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              {content}
+            </p>
           ) : (
             content
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end gap-3">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-3">
           {showCancel && (
             <button
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-all border border-gray-300"
+              className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all border border-gray-300 dark:border-gray-600"
             >
               {cancelText}
             </button>

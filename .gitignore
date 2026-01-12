@@ -61,3 +61,10 @@ Thumbs.db
 *.temp
 .cache
 
+# database files
+*.db
+*.db-shm
+*.db-wal
+/data/sessions
+
+

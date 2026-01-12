@@ -1,14 +1,129 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-primary: #0A7BFF;
-  --color-background: #F5F7FA;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-border: #e5e7eb;
+  /* ========================================
+     Primary Colors - Tech Blue (#5C73EE)
+     ======================================== */
+  --color-primary-50: #EEF4FF;
+  --color-primary-100: #E0EAFF;
+  --color-primary-200: #C7D7FE;
+  --color-primary-300: #A4B9FC;
+  --color-primary-400: #8094F9;
+  --color-primary-500: #5C73EE;
+  --color-primary-600: #4B5FD6;
+  --color-primary-700: #3A4BB8;
+  --color-primary-800: #2D3A91;
+  --color-primary-900: #232D72;
 
+  /* ========================================
+     Accent Colors - Progress Orange (#F97316)
+     ======================================== */
+  --color-accent-50: #FFF7ED;
+  --color-accent-100: #FFEDD5;
+  --color-accent-200: #FED7AA;
+  --color-accent-300: #FDBA74;
+  --color-accent-400: #FB923C;
+  --color-accent-500: #F97316;
+  --color-accent-600: #EA580C;
+
+  /* ========================================
+     Semantic Colors
+     ======================================== */
+  /* Success - Cyan Green */
+  --color-success-50: #ECFDF5;
+  --color-success-100: #D1FAE5;
+  --color-success-200: #A7F3D0;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+
+  /* Warning - Amber */
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+
+  /* Error - Red */
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-200: #FECACA;
+  --color-error-500: #EF4444;
+  --color-error-600: #DC2626;
+  --color-error-700: #B91C1C;
+
+  /* Info - Indigo */
+  --color-info-50: #EEF2FF;
+  --color-info-100: #E0E7FF;
+  --color-info-200: #C7D2FE;
+  --color-info-500: #6366F1;
+  --color-info-600: #4F46E5;
+  --color-info-700: #4338CA;
+
+  /* ========================================
+     Neutral Colors - Blue-Gray Tones
+     ======================================== */
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+
+  /* ========================================
+     Background & Surface Colors
+     ======================================== */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F8FAFC;
+  --color-background-tertiary: #F1F5F9;
+  --color-background-elevated: #FFFFFF;
+
+  /* ========================================
+     Text Colors
+     ======================================== */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748B;
+  --color-text-inverse: #FFFFFF;
+
+  /* ========================================
+     Border Colors
+     ======================================== */
+  --color-border: #E2E8F0;
+  --color-border-muted: #F1F5F9;
+
+  /* ========================================
+     Easing Functions
+     ======================================== */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ========================================
+     Animation Durations
+     ======================================== */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* ========================================
+     Animations
+     ======================================== */
   --animate-fadeIn: fadeIn 0.2s ease-out;
   --animate-slideUp: slideUp 0.3s ease-out;
+  --animate-slideInRight: slideInRight 0.3s var(--ease-out-quart);
+  --animate-scaleIn: scaleIn 0.2s var(--ease-out-expo);
+  --animate-fadeInUp: fadeInUp 0.4s var(--ease-out-quart);
+  --animate-pulse-subtle: pulseSubtle 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-bounce-subtle: bounceSubtle 1s ease-in-out infinite;
 
   @keyframes fadeIn {
     '0%': { opacity: 0; }
@@ -19,24 +134,302 @@
     '0%': { transform: translateY(20px); opacity: 0; }
     '100%': { transform: translateY(0); opacity: 1; }
   }
+
+  @keyframes slideInRight {
+    '0%': { transform: translateX(20px); opacity: 0; }
+    '100%': { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    '0%': { transform: scale(0.95); opacity: 0; }
+    '100%': { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    '0%': { transform: translateY(16px); opacity: 0; }
+    '100%': { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes pulseSubtle {
+    '0%, 100%': { opacity: 1; }
+    '50%': { opacity: 0.8; }
+  }
+
+  @keyframes shimmer {
+    '0%': { background-position: -1000px 0; }
+    '100%': { background-position: 1000px 0; }
+  }
+
+  @keyframes float {
+    '0%, 100%': { transform: translateY(0px); }
+    '50%': { transform: translateY(-10px); }
+  }
+
+  @keyframes bounceSubtle {
+    '0%, 100%': { transform: translateY(0); }
+    '50%': { transform: translateY(-3px); }
+  }
 }
 
+/* ========================================
+   Dark Mode Theme
+   ======================================== */
+.dark {
+  @theme {
+    /* ========================================
+       Background & Surface Colors (Dark Mode)
+       ======================================== */
+    --color-background-primary: #0F172A;
+    --color-background-secondary: #1E293B;
+    --color-background-tertiary: #334155;
+    --color-background-elevated: #1E293B;
+
+    /* ========================================
+       Text Colors (Dark Mode)
+       ======================================== */
+    --color-text-primary: #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-text-tertiary: #64748B;
+    --color-text-inverse: #0F172A;
+
+    /* ========================================
+       Border Colors (Dark Mode)
+       ======================================== */
+    --color-border: #334155;
+    --color-border-muted: #1E293B;
+  }
+}
+
+/* ========================================
+   CSS Variables (Legacy Support)
+   ======================================== */
 :root {
-  --primary: #0a7bff;
-  --background: #f5f7fa;
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --border: #e5e7eb;
+  --primary: #5C73EE;
+  --background: #F8FAFC;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --border: #E2E8F0;
+
+  /* Gradient definitions */
+  --gradient-primary: linear-gradient(135deg, #5C73EE 0%, #4B5FD6 100%);
+  --gradient-accent: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  --gradient-success: linear-gradient(135deg, #10B981 0%, #047857 100%);
+  --gradient-hero: linear-gradient(135deg, #EEF4FF 0%, #F8FAFC 50%, #FFF7ED 100%);
 }
 
+/* ========================================
+   Global Styles
+   ======================================== */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    'SF Pro Display',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
   background-color: var(--background);
   color: var(--text-primary);
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* ========================================
+   Display Font Family (Engineering Aesthetic)
+   ======================================== */
+.font-display {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', 'Courier New', monospace;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+/* Focus visible styles - improved design */
+*:focus-visible {
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Default focus ring for interactive elements */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Completely remove all focus borders and rings for inputs */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  outline-color: transparent !important;
+  outline-offset: 0 !important;
+  border: none !important;
+  border-style: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 3px rgba(92, 115, 238, 0.2) !important;
+}
+
+/* Remove all borders for inputs in all states */
+input,
+textarea,
+select {
+  border-color: transparent !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border: none !important;
+  border-color: transparent !important;
+}
+
+/* Remove Tailwind ring utility */
+input:focus-visible,
+textarea:focus-visible {
+  --tw-ring-opacity: 0 !important;
+}
+
+/* Remove webkit focus styles */
+input:focus::-webkit-input-placeholder,
+textarea:focus::-webkit-input-placeholder {
+  opacity: 1;
+}
+
+/* Remove Firefox focus styles */
+input:focus::-moz-placeholder,
+textarea:focus::-moz-placeholder {
+  opacity: 1;
+}
+
+/* Remove IE/Edge focus styles */
+input:focus:-ms-input-placeholder,
+textarea:focus:-ms-input-placeholder {
+  opacity: 1;
+}
+
+/* Specifically remove native browser focus rings */
+input::-webkit-focus-ring,
+textarea::-webkit-focus-ring,
+select::-webkit-focus-ring {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any autofill background styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 3px rgba(92, 115, 238, 0.2) !important;
+  -webkit-text-fill-color: inherit;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+
+/* ========================================
+   Modern Utility Classes
+   ======================================== */
+
+/* Scrollbar Hide - for horizontal scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Focus Ring - enhanced accessibility */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Glassmorphism Effect */
+.glass {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.dark .glass {
+  background-color: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.2);
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-200) 0%,
+    var(--color-gray-100) 50%,
+    var(--color-gray-200) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-700) 0%,
+    var(--color-gray-600) 50%,
+    var(--color-gray-700) 100%
+  );
 }

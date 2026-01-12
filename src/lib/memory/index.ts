@@ -1,13 +1,14 @@
 /**
  * Memory Module Entry Point
- * 提供统一的记忆存储访问接口
+ * Provides unified memory storage access interface
  */
 
-import { LocalJSONStorage } from './local-storage';
+import { SQLiteStorage } from '../storage/db-storage';
 import { MemoryStorage } from './interface';
 
-// MVP阶段使用本地JSON存储
-const storage: MemoryStorage = new LocalJSONStorage();
+// Use SQLite for persistent storage
+const storage: MemoryStorage = new SQLiteStorage();
 
 export default storage;
 export type { MemoryStorage } from './interface';
+export { SQLiteStorage } from '../storage/db-storage';

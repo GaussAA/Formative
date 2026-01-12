@@ -2,12 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import sessionStorage, { SessionRecord } from '@/lib/sessionStorage';
 import { Card, CardContent } from '@/components/shared/Card';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { Modal } from '@/components/shared/Modal';
 import { StageNames } from '@/types';
+
+interface SessionRecord {
+  sessionId: string;
+  projectName: string | null;
+  currentStage: number;
+  completeness: number;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -23,8 +32,11 @@ export default function HistoryPage() {
   const loadSessions = async () => {
     setLoading(true);
     try {
-      const allSessions = await sessionStorage.getAllSessions();
-      setSessions(allSessions);
+      const response = await fetch('/api/sessions');
+      const result = await response.json();
+      if (result.success) {
+        setSessions(result.data);
+      }
     } catch (error) {
       console.error('Failed to load sessions:', error);
     } finally {
@@ -40,32 +52,21 @@ export default function HistoryPage() {
     if (!sessionToDelete) return;
 
     try {
-      await sessionStorage.deleteSession(sessionToDelete);
-      setSessions(sessions.filter(s => s.sessionId !== sessionToDelete));
-      setDeleteModalOpen(false);
-      setSessionToDelete(null);
+      const response = await fetch(`/api/sessions/${sessionToDelete}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setSessions(sessions.filter(s => s.sessionId !== sessionToDelete));
+        setDeleteModalOpen(false);
+        setSessionToDelete(null);
+      }
     } catch (error) {
       console.error('Failed to delete session:', error);
       alert('删除失败，请稍后重试');
     }
   };
 
-  const handleDownload = (session: SessionRecord) => {
-    if (!session.stageData.finalSpec) {
-      alert('该会话还未生成最终文档');
-      return;
-    }
-
-    const blob = new Blob([session.stageData.finalSpec], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${session.projectName || 'project'}-spec.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -159,7 +160,7 @@ export default function HistoryPage() {
                           <Badge variant="success">✅ 已完成</Badge>
                         ) : (
                           <Badge variant="default">
-                            进行中 - {StageNames[session.currentStage]}
+                            进行中 - {StageNames[session.currentStage as keyof typeof StageNames]}
                           </Badge>
                         )}
                       </div>
@@ -168,13 +169,9 @@ export default function HistoryPage() {
                         <span>创建于 {formatDate(session.createdAt)}</span>
                         <span>•</span>
                         <span>最后更新 {formatDate(session.updatedAt)}</span>
+                        <span>•</span>
+                        <span>完成度 {session.completeness}%</span>
                       </div>
-
-                      {session.stageData.requirement.productGoal && (
-                        <p className="text-sm text-gray-700 line-clamp-2">
-                          {session.stageData.requirement.productGoal}
-                        </p>
-                      )}
                     </div>
 
                     <div className="flex items-center gap-2 ml-4">
@@ -185,18 +182,6 @@ export default function HistoryPage() {
                       >
                         查看详情
                       </Button>
-                      {session.stageData.finalSpec && (
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownload(session);
-                          }}
-                          size="sm"
-                          variant="outline"
-                        >
-                          下载文档
-                        </Button>
-                      )}
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -218,7 +203,7 @@ export default function HistoryPage() {
         )}
       </main>
 
-      {/* 删除确认弹窗 */}
+      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => {

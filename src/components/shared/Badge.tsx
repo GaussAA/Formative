@@ -1,5 +1,6 @@
 import React from 'react';
 import { RiskSeverity } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -8,43 +9,43 @@ interface BadgeProps {
   className?: string;
 }
 
+/**
+ * Badge component with refined color system and dark mode support
+ */
 export function Badge({ children, variant = 'default', severity, className = '' }: BadgeProps) {
-  // 如果提供了severity，优先使用severity的颜色
   let colorClass = '';
 
   if (severity) {
-    switch (severity) {
-      case RiskSeverity.LOW:
-        colorClass = 'bg-green-100 text-green-800 border-green-200';
-        break;
-      case RiskSeverity.MEDIUM:
-        colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        break;
-      case RiskSeverity.HIGH:
-        colorClass = 'bg-red-100 text-red-800 border-red-200';
-        break;
-    }
+    colorClass = {
+      [RiskSeverity.LOW]:
+        'bg-success-50 dark:bg-success-900/30 text-success-700 dark:text-success-300 border-success-200 dark:border-success-800',
+      [RiskSeverity.MEDIUM]:
+        'bg-warning-50 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 border-warning-200 dark:border-warning-800',
+      [RiskSeverity.HIGH]:
+        'bg-error-50 dark:bg-error-900/30 text-error-700 dark:text-error-300 border-error-200 dark:border-error-800',
+    }[severity];
   } else {
-    switch (variant) {
-      case 'success':
-        colorClass = 'bg-green-100 text-green-800 border-green-200';
-        break;
-      case 'warning':
-        colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        break;
-      case 'danger':
-        colorClass = 'bg-red-100 text-red-800 border-red-200';
-        break;
-      case 'info':
-        colorClass = 'bg-blue-100 text-blue-800 border-blue-200';
-        break;
+    colorClass = {
+      success:
+        'bg-success-50 dark:bg-success-900/30 text-success-700 dark:text-success-300 border-success-200 dark:border-success-800',
+      warning:
+        'bg-warning-50 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 border-warning-200 dark:border-warning-800',
+      danger:
+        'bg-error-50 dark:bg-error-900/30 text-error-700 dark:text-error-300 border-error-200 dark:border-error-800',
+      info: 'bg-info-50 dark:bg-info-900/30 text-info-700 dark:text-info-300 border-info-200 dark:border-info-800',
       default:
-        colorClass = 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+        'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
+    }[variant];
   }
 
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${colorClass} ${className}`}>
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border transition-all duration-200',
+        colorClass,
+        className
+      )}
+    >
       {children}
     </span>
   );

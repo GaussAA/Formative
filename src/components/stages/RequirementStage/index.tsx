@@ -262,7 +262,7 @@ export function RequirementStage() {
   };
 
   return (
-    <div className="flex h-full bg-slate-50">
+    <div className="flex h-full">
       {/* 左侧收集面板 */}
       <LeftPanel
         completeness={completeness}
